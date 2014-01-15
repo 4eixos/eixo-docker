@@ -1,0 +1,6 @@
+Revision history for Perl extension Eixo::Docker.
+
+0.01  Wed Jan 15 11:38:05 2014
+	- original version; created by h2xs 1.23 with options
+		-AX Eixo::Docker
+
