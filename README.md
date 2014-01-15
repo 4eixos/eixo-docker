@@ -26,7 +26,7 @@ Install docker:
 
 Setup docker daemon listening in localhost:4243 tcp port:
 
-- Add this line to /etc/default/docker.conf
+- Add this line to **/etc/default/docker**
 
         DOCKER_OPTS="-H 127.0.0.1:4243 -d"
 
