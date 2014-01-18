@@ -1,16 +1,24 @@
 package Eixo::Docker::Api;
 use strict;
 
-use LWP::UserAgent;
 use URI;
+use LWP::UserAgent;
+
+use parent qw(Eixo::Base::Clase);
 
 my $REQ_PARSER = qr/([a-z]+)([A-Z]\w+?)$/;
 
 sub new{
 	my $self = bless({
+
 		endpoint => $_[1] || die("API ENDPOINT NEEDED"),
+
 		ua => undef,
+
 		format => 'json',
+
+		flog => undef,
+
 	}, $_[0]);
 
 	# initialize user agent
@@ -18,7 +26,6 @@ sub new{
 
 	$self;
 }
-
 
 sub ua {
 	my ($self, $ua_str) = @_;
@@ -37,6 +44,7 @@ sub AUTOLOAD{
 	my ($self, %args) = @_;
 
 	my ($method, $entity) = our $AUTOLOAD =~ $REQ_PARSER;
+
 	$entity = lc($entity);
 
 	unless(grep { $method eq $_ } qw(put get post delete patch)){
@@ -71,12 +79,14 @@ sub put{
 	
 }
 
-sub get{
+sub get : __log(GET) {
+
 	my ($self, $uri, %args) = @_;
 
 	$uri->query_form(%args);
 
 	my $req = HTTP::Request->new(GET => $uri);
+
 	$self->__send($req);
 }
 
@@ -125,5 +135,6 @@ sub __send{
 	}
 
 }
+
 
 1;
