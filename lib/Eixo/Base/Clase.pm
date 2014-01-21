@@ -18,7 +18,7 @@ sub __log : ATTR(CODE){
 
 		my ($self, @args) = @_;
 
-		$self->logger([$pkg, $data->[0]], \@args);
+		$self->logger([$pkg, *{$sym}{NAME}], \@args);
 
 		$code->($self, @args);
 	};
