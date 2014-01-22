@@ -5,6 +5,52 @@ use warnings;
 
 use Attribute::Handlers;
 
+use base qw(Class::Accessor);
+
+sub new{
+	my ($clase, @args) = @_;
+
+	my $self = bless({}, $clase);
+
+	my %attrs = $self->attrs;
+
+	$self->mk_accessors(keys(%attrs));
+
+	$self->$_($attrs{$_}) foreach(keys(%attrs));
+
+	$self->initialize(@args) if($self->can('initialize'));
+
+	$self;
+}
+
+#
+# Methods
+#
+sub methods{
+	my ($self, $class, $nested) = @_;
+
+	$class = $class || ref($self) || $self;
+
+	no strict 'refs';
+
+	my @methods = grep { defined(&{$class . '::' . $_} ) } keys(%{$class . '::'});
+
+	push @methods, $self->methods($_, 1) foreach(@{ $class .'::ISA' } );
+
+
+	unless($nested){
+
+		my %s;
+
+		$s{$_}++ foreach( map { $_ =~ s/.+\:\://; $_ } @methods);
+
+		return keys(%s);
+	}
+
+	@methods;
+	
+}
+
 #
 # logger installing code
 #

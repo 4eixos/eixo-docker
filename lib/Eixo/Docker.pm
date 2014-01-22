@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-require Exporter;
+use parent qw(Eixo::Base::Clase);
 
 
 # Items to export into callers namespace by default. Note: do not export
@@ -14,6 +14,7 @@ require Exporter;
 our $VERSION = '0.01';
 
 
-# Preloaded methods go here.
+
+
 
 1;
