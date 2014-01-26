@@ -5,18 +5,64 @@ use warnings;
 
 use Attribute::Handlers;
 
-use base qw(Class::Accessor);
+use base qw(Exporter);
+
+our @EXPORT = qw(has);
+
+sub has{
+	my (%attributes) = @_;
+
+	my $class = (caller(0))[0];
+
+	no strict 'refs';
+	
+	foreach my $attribute (keys(%attributes)){
+			
+		unless(defined(&{$class . '::' . $attribute})){
+
+			*{$class . '::' . $attribute} = sub {
+
+				my ($self, $value)  = @_;
+
+				if(defined($value)){
+					
+					$self->{$attribute} = $value;
+					
+					$self;
+				}
+				else{
+					$self->{$attribute};
+				}	
+
+			};
+		}
+	}
+
+	*{$class . '::' . '__initialize'} = sub {
+
+		my ($self) = @_;
+
+		$self->$_($attributes{$_}) foreach(keys %attributes);
+	};  
+}
 
 sub new{
 	my ($clase, @args) = @_;
 
 	my $self = bless({}, $clase);
 
-	my %attrs = $self->attrs;
+	if(@args % 2 == 0){
 
-	$self->mk_accessors(keys(%attrs));
+		my %args = @args;
 
-	$self->$_($attrs{$_}) foreach(keys(%attrs));
+		foreach(keys(%args)){
+
+			$self->$_($args{$_}) if($self->can($_));
+
+		}
+	}
+
+	$self->__initialize;
 
 	$self->initialize(@args) if($self->can('initialize'));
 
