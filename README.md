@@ -4,6 +4,8 @@ Eixo::Docker module
 Perl module to interact with Docker API (http://docs.docker.io/en/latest/api/docker_remote_api_v1.8/)
 
 
+
+
 To setup development environment:
 --------------------------------
 
@@ -34,3 +36,11 @@ Setup docker daemon listening in localhost:4243 tcp port:
 - restart docker service:
 
         $ sudo service docker restart
+
+
+Common usage examples:
+
+Launching a bash interpreter in a container with ubuntu 12.04
+
+    docker -H 127.0.0.1:4243 run -t -i ubuntu /bin/bash
+    
