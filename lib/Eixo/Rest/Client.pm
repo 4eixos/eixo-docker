@@ -1,20 +1,19 @@
-package Eixo::Docker::Client;
+package Eixo::Rest::Client;
 use strict;
 
+use Eixo::Base::Clase;
 use URI;
 use LWP::UserAgent;
 
-use parent qw(Eixo::Base::Clase);
-
 my $REQ_PARSER = qr/([a-z]+)([A-Z]\w+?)$/;
 
-sub attrs{
+has(
 
 	ua=>undef,
 	endpoint=>undef,
 	format=>'json',
 	flog=>undef,
-}
+);
 
 sub initialize{
 	my ($self, $endpoint) = @_;

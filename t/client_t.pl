@@ -7,14 +7,14 @@ use JSON;
 
 use lib './lib';
 
-use Eixo::Docker::Client;
+use Eixo::Rest::Client;
 
 # set log function
 # Eixo::Docker::Base::stashSet("f_log", sub {print join("\n",@_)});
 
 my @calls;
 
-my $a = Eixo::Docker::Client->new("http://localhost:4243");
+my $a = Eixo::Rest::Client->new("http://localhost:4243");
 
 #
 # Set a logger sub
@@ -37,7 +37,7 @@ ok($@ =~ /UNKNOW METHOD/, 'Controla metodos no existentes');
 
 my $h = JSON->new->decode($a->getContainers(all => 1));
 
-#print Dumper($h);
+print Dumper($h);
 
 ok(
 	ref $h eq "ARRAY", 
@@ -47,13 +47,6 @@ ok(
 ok($calls[0] eq 'get', 'Method call has been logged');
 
 ok(ref JSON->new->decode($a->getContainers(id=>1)) eq 'HASH', "Show first container command return an hash");
-
-$a->postContainers(action => "create",name => 'francisquito' );
-
-ok(
-	grep {$_->name eq 'francisquito'} @{$a->getContainers(all => 1)},
-	"Find container recently created"
-);
 
 
 done_testing();

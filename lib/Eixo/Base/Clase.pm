@@ -1,13 +1,21 @@
 package Eixo::Base::Clase;
 
+use Attribute::Handlers;
+
 use strict;
 use warnings;
 
-use Attribute::Handlers;
-
-use base qw(Exporter);
+use parent qw(Exporter);
 
 our @EXPORT = qw(has);
+
+
+sub import{
+	no strict "refs";
+	my $caller = caller;
+	push @{$caller . '::ISA'}, "Eixo::Base::Clase";
+	*{$caller . '::has'} = \&has;
+}
 
 sub has{
 	my (%attributes) = @_;
