@@ -20,6 +20,9 @@ sub AUTOLOAD{
 	$self->client->$method(@args);
 }
 
+
+sub DESTROY {}
+
 sub initialize{
 	my ($self, $endpoint) = @_;
 
@@ -59,6 +62,11 @@ sub __analyzeRequest{
 
 		}		
 
+	}
+	
+	# set client error callback if exists
+	if(exists $args{onError}){
+		$self->client->error_callback($args{onError});
 	}
 
 	%{$args{args}};
