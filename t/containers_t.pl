@@ -45,22 +45,42 @@ ok($@->error eq 'No such container', "Launch exception for non existent containe
 #print Dumper($@);
 
 # create
+# 0. Drop container testing123 if exists
+print "Cleaning\n";
+eval {
+	my $c = $a->containers->getByName("testing123");
+    $a->containers->delete(id => $c->ID) if($c);
+};
+
 $@ = undef;
 my $c = undef;
+my $memory = 128*1024*1024; #128MB
+
 my $h = {
 
 	Hostname => 'test',
-	#Memory => 512,
+	Memory => $memory,
 	Cmd => ["bash"],
 	Image => "ubuntu",
+    Name => "testing123",
 };
 
 eval{
 	$c = $a->containers->create($h);
 };
-ok(!$@, "Container created with id ".Dumper($@));
-ok($c && $c->Config->Memory == 512, "Memory correctly asigned");
+ok(!$@, "Container created with id ".$c->ID);
+ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
 
+eval {
+    $c = $a->containers->getByName("testing123");
+};
+ok(!$@, "getByName working correctly");
+#die(Dumper($c));
+
+eval{
+	$a->containers->delete(id => $c->ID);
+};
+ok(!$@, "Container deleted");
 
 
 #my $container = $a->containers->get($id||$nombre||$obj);

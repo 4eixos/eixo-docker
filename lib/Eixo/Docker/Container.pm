@@ -52,6 +52,17 @@ sub get{
 	$self;
 }
 
+sub getByName {
+    my ($self, $name) = @_;
+    $name = '/'.$name unless($name =~ /^\//);
+    
+    #get all containers
+    my $list = $self->getAll();
+    foreach my $c (@$list){
+        return $self->get(id => $c->Id) if (grep {$name eq $_} @{$c->Names});
+    }
+}
+
 sub getAll {
 
 	my $self = $_[0];
@@ -75,28 +86,52 @@ sub create {
 	my $self = $_[0];
 	my $attrs = $_[1];
 
+    my $args = {};
+
+    if(exists($attrs->{Name})){
+        $args->{GET_DATA} = {name => $attrs->{Name}};
+        delete($attrs->{Name});
+    }
 
 	# validate attrs and fill with default values not set
 	my $config = Eixo::Docker::Config->new->populate($attrs);
 	
-	my $args = {
-		action => 'create',
-		config => $config->json,
-	};
+	$args->{action} = 'create';
+	$args->{POST_DATA}  = $config;
 
-	$self->populate(
-		$self->api->postContainers(
+	my $res = $self->api->postContainers(
 			
-			needed=>[qw(config)],
-
 			onError=>sub { $self->error(@_) },
 
 			args => $args,
-		)
 	);
+
+    my $id = $res->{Id};
+
+    #return container full loaded
+    $self->get(id => $id);
 
 }
 
+
+sub delete{
+	my ($self, %args) = @_;
+
+    if(exists($args{v})){
+        $args{GET_DATA} = {v => $args{v}};
+        delete($args{v});
+    }
+
+	$self->api->deleteContainers(
+
+		needed=>[qw(id)],
+
+		onError=>sub { $self->error(@_) },
+
+        args => \%args,
+    );
+
+}
 
 
 sub __error {

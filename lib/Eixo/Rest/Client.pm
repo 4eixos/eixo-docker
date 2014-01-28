@@ -4,9 +4,10 @@ use strict;
 use Eixo::Base::Clase;
 use URI;
 use LWP::UserAgent;
-use JSON;
+use JSON -convert_blessed_universally;
+use Carp;
 
-my $REQ_PARSER = qr/([a-z]+)([A-Z]\w+?)$/;
+my $REQ_PARSER = qr/\:\:([a-z]+)([A-Z]\w+?)$/;
 
 has(
 
@@ -55,7 +56,7 @@ sub AUTOLOAD{
 	$entity = lc($entity);
 
 	unless(grep { $method eq $_ } qw(put get post delete patch)){
-		die(ref($self) . ': UNKNOW METHOD: ' . $method);
+		confess(ref($self) . ': UNKNOW METHOD: ' . $method);
 	}
 
 
@@ -74,21 +75,14 @@ sub AUTOLOAD{
 
 	my $uri = $self->build_uri($entity, $id, $action);
 
-	print("Sending request to $uri with query ".$self->generate_query_str(%args)."\n");
 	my $res = $self->$method($uri, %args);
-	print("Response: $res\n");
+    #print("Response: $res\n");
 
 	return $res;
 }
 
 sub DESTROY {}
 
-sub patch{
-}
-
-sub put{
-	
-}
 
 sub get : __log {
 
@@ -103,15 +97,57 @@ sub get : __log {
 
 sub post : __log {
 	my ($self,$uri,%args) = @_;
+
+    # Is possible to add query string args to post requests
+    $uri->query_form($args{GET_DATA});
+
 	my $req = HTTP::Request->new(POST => $uri);
-	$req->content($self->generate_query_str(%args));
+    $req->header('content-type' => 'application/json');
+
+    my $content = JSON->new->allow_blessed(1)
+                            ->convert_blessed(1)
+                            ->encode($args{POST_DATA});
+
+    $req->content($content);
+	
+    #print("Sending post request to $uri with query ".$uri->query."\n");
+    
+	$self->__send($req);
+}
+
+sub delete : __log {
+
+	my ($self, $uri, %args) = @_;
+
+	$uri->query_form($args{GET_DATA});
+
+	my $req = HTTP::Request->new(DELETE => $uri);
 
 	$self->__send($req);
 }
 
-sub delete{
+sub patch :__log {
+	my ($self, $uri, %args) = @_;
+
+	$uri->query_form($args{GET_DATA});
+
+	my $req = HTTP::Request->new(PATCH => $uri);
+
+	$self->__send($req);
 
 }
+
+sub put :__log {
+	my ($self, $uri, %args) = @_;
+
+	$uri->query_form($args{GET_DATA});
+
+	my $req = HTTP::Request->new(PUT=> $uri);
+
+	$self->__send($req);
+
+}
+
 
 sub build_uri {
 	my ($self, $entity, $id,$action) = @_;
@@ -121,7 +157,9 @@ sub build_uri {
 	$uri .= '/'.$id if(defined($id));
 	$uri .= '/'.$action if(defined($action));
 
-	return URI->new($uri.'/'.$self->{format});
+    ($self->current_method =~ /^get/)?
+        URI->new($uri.'/'.$self->{format}):
+        URI->new($uri);
 }
 
 
@@ -139,7 +177,7 @@ sub __send{
 	my $res = $self->ua->request($req);
 
 	if($res->is_success){
-		if ($self->format eq 'json'){
+		if ($self->format eq 'json' && $res->content){
 			return JSON->new->decode($res->content);
 		}
 	}

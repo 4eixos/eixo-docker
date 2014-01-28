@@ -1,7 +1,6 @@
 package Eixo::Base::Clase;
 
 use Attribute::Handlers;
-use JSON -convert_blessed_universally;
 use strict;
 use warnings;
 
@@ -141,10 +140,6 @@ sub logger{
 	return unless($self->{flog});
 
 	$self->{flog}->($self, @args);
-}
-
-sub json {
-	JSON->new()->allow_blessed(1)->convert_blessed(1)->encode($_[0]);
 }
 
 1;
