@@ -31,6 +31,18 @@ has(
 
 );
 
+sub initialize {
+    my $self = $_[0];
+
+    # set default Docker::Rest::Client error callback 
+    # to call when API response error is received
+    $self->api->client->error_callback(
+        sub { $self->error(@_) }    
+    );
+
+    $self;
+}
+
 sub get{
 	my ($self, %args) = @_;
 
@@ -40,20 +52,23 @@ sub get{
 
 			needed=>[qw(id)],
 
-			onError=>sub { $self->error(@_) },
-
 			args=>\%args
 
 		)
 	);
 
+    # load config obj replacing config hash 
 	$self->Config(Eixo::Docker::Config->new->populate($self->Config));
 
 	$self;
 }
 
+
 sub getByName {
     my ($self, $name) = @_;
+
+    return undef unless($name);
+
     $name = '/'.$name unless($name =~ /^\//);
     
     #get all containers
@@ -63,17 +78,20 @@ sub getByName {
     }
 }
 
+
 sub getAll {
 
 	my $self = $_[0];
 
 	my $list  = [];
 
-	foreach my $r (@{
-			$self->api->getContainers(
-				onError => sub {$self->error(@_)},
-				args => {all => 1})}
-			){
+    my $args = {
+        GET_DATA => {
+            all => 1
+        }
+    };
+
+	foreach my $r (@{$self->api->getContainers(args => $args)}){
 
 		push @$list, Eixo::Docker::ContainerResume->new->populate($r)
 	}
@@ -82,33 +100,30 @@ sub getAll {
 	
 }
 
+
 sub create {
-	my $self = $_[0];
-	my $attrs = $_[1];
+	my ($self , %attrs) = @_;
 
     my $args = {};
 
-    if(exists($attrs->{Name})){
-        $args->{GET_DATA} = {name => $attrs->{Name}};
-        delete($attrs->{Name});
+    if(exists($attrs{Name})){
+        $args->{GET_DATA} = {name => $attrs{Name}};
+        delete($attrs{Name});
     }
 
-	# validate attrs and fill with default values not set
-	my $config = Eixo::Docker::Config->new->populate($attrs);
+	# validate attrs and initialize default values not setted
+	my $config = Eixo::Docker::Config->new->populate(\%attrs);
 	
 	$args->{action} = 'create';
 	$args->{POST_DATA}  = $config;
 
 	my $res = $self->api->postContainers(
-			
-			onError=>sub { $self->error(@_) },
-
 			args => $args,
 	);
 
     my $id = $res->{Id};
 
-    #return container full loaded
+    #return container fully loaded
     $self->get(id => $id);
 
 }
@@ -117,17 +132,19 @@ sub create {
 sub delete{
 	my ($self, %args) = @_;
 
-    if(exists($args{v})){
-        $args{GET_DATA} = {v => $args{v}};
-        delete($args{v});
-    }
+    my $delete_volumes = (exists($args{delete_volumes}))? 
+                            $args{delete_volumes}:
+                            (exists($args{v}))? 
+                                $args{v} :0;
+    
+
+
+    $args{GET_DATA} = {
+            v => $delete_volumes
+    };
 
 	$self->api->deleteContainers(
-
 		needed=>[qw(id)],
-
-		onError=>sub { $self->error(@_) },
-
         args => \%args,
     );
 
@@ -144,14 +161,6 @@ sub __error {
 	)->raise();
 
 }
-
-#sub __errorCodeGetContainers {
-#	my ($self, $error_code, $msg) = @_;
-#
-#	if($error_code eq '404'){
-#		die("No such container:$msg");	
-#	}
-#}
 
 
 1;

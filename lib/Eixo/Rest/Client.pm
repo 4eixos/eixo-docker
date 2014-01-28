@@ -6,6 +6,7 @@ use URI;
 use LWP::UserAgent;
 use JSON -convert_blessed_universally;
 use Carp;
+use Data::Dumper;
 
 my $REQ_PARSER = qr/\:\:([a-z]+)([A-Z]\w+?)$/;
 
@@ -59,8 +60,6 @@ sub AUTOLOAD{
 		confess(ref($self) . ': UNKNOW METHOD: ' . $method);
 	}
 
-
-
 	my ($id, $action);
 
 	if(exists($args{id})){
@@ -74,6 +73,7 @@ sub AUTOLOAD{
 	}
 
 	my $uri = $self->build_uri($entity, $id, $action);
+    #print("Sending request to $uri with query ".$uri->query."\n");
 
 	my $res = $self->$method($uri, %args);
     #print("Response: $res\n");
@@ -88,7 +88,7 @@ sub get : __log {
 
 	my ($self, $uri, %args) = @_;
 
-	$uri->query_form(%args);
+	$uri->query_form($args{GET_DATA});
 
 	my $req = HTTP::Request->new(GET => $uri);
 
@@ -110,7 +110,6 @@ sub post : __log {
 
     $req->content($content);
 	
-    #print("Sending post request to $uri with query ".$uri->query."\n");
     
 	$self->__send($req);
 }
@@ -173,12 +172,17 @@ sub generate_query_str {
 sub __send{
 
 	my ($self, $req) = @_;
+	my $uri = $req->uri;
+    # print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
 
 	my $res = $self->ua->request($req);
+    # print "Response: ".Dumper($res)."\n";
 
 	if($res->is_success){
-		if ($self->format eq 'json' && $res->content){
-			return JSON->new->decode($res->content);
+		if($res->content){
+			if ($self->format eq 'json' ){
+				return JSON->new->decode($res->content);
+			}
 		}
 	}
 	else{

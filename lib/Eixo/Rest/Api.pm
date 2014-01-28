@@ -5,6 +5,7 @@ use Eixo::Base::Clase;
 
 use Attribute::Handlers;
 use Eixo::Rest::Client;
+use Carp;
 
 has (client => undef);
 
@@ -50,24 +51,27 @@ sub produce{
 sub __analyzeRequest{
 	my ($self, $method, %args) = @_;
 
-	my $f_error = $args{onError} || sub {
-		die($_[0] . ' : ' . $_[1]);
-	};
+	# set client error callback for request if exists
+	# Always is defined an error callback by default
+	if(exists $args{onError}){
+		$self->client->error_callback($args{onError});
+	}
 
+	# check args needed
 	if($args{needed}){
 
 		foreach (@{$args{needed}}){
 
-		 	&$f_error($method, 'PARAM_NEEDED', $_) unless(exists($args{args}->{$_}));
+			&{$self->client->error_callback}(
+				$method, 
+				'PARAM_NEEDED', 
+				$_) unless(exists($args{args}->{$_}));
 
 		}		
 
-	}
-	
-	# set client error callback if exists
-	if(exists $args{onError}){
-		$self->client->error_callback($args{onError});
-	}
+	}	
+
+
 
 	%{$args{args}};
 }
