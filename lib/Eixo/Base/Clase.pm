@@ -4,6 +4,7 @@ use Attribute::Handlers;
 use strict;
 use warnings;
 
+
 use parent qw(Exporter);
 
 our @EXPORT = qw(has);
@@ -58,6 +59,12 @@ sub new{
 
 	my $self = bless({}, $clase);
 
+	# 3 initilization forms with defined precedence
+
+	# initialize attributes with default values from 'has' hash
+	$self->__initialize;
+
+	# if new is called with initialization values (not recommended)
 	if(@args % 2 == 0){
 
 		my %args = @args;
@@ -69,8 +76,7 @@ sub new{
 		}
 	}
 
-	$self->__initialize;
-
+	# if class has initialize method (recommended)
 	$self->initialize(@args) if($self->can('initialize'));
 
 	$self;
