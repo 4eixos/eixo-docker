@@ -42,5 +42,7 @@ Common usage examples:
 
 Launching a bash interpreter in a container with ubuntu 12.04
 
-    docker -H 127.0.0.1:4243 run -t -i ubuntu /bin/bash
+    export DOCKER_HOST="tcp://127.0.0.1:4243"
+    docker run -t -i ubuntu /bin/bash
+*Run above commands as root*
     
