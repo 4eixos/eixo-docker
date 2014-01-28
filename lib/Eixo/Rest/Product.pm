@@ -3,7 +3,6 @@ package Eixo::Rest::Product;
 use strict;
 use Eixo::Base::Clase;
 
-use Attribute::Handlers;
 use Eixo::Rest::Client;
 
 has (api => undef);
@@ -19,23 +18,36 @@ sub populate{
 sub error{
 	my ($self, $method, $reason, @args) = @_;
 
-	if($reason eq 'PARAM_NEEDED'){
-		die($method . ' needs ' . $args[0]);
-	}
-	elsif($reason eq 'ERROR_CODE'){
-	
-		my $error_method = '__errorCode' . ucfirst($method);
-
-		if($self->can($error_method)){
-			$self->$error_method(@args);
-		}
-		else{
-			die($method . " : error code " . $args[0]);
-		}
+	if($self->can("__error")){
+		$self->__error($method, $reason, @args);
 	}
 	else{
-		die('Unknow error: ' . $reason);
+		Eixo::Rest::BaseException->new(
+			method => $method,
+			reason => $reason,
+			args => \@args,
+		)->raise();
 	}
+
+	#if($reason eq 'PARAM_NEEDED'){
+	#	die($method . ' needs ' . $args[0]);
+	#}
+	#elsif($reason eq 'ERROR_CODE'){
+
+	#
+	#	my $error_method = '__errorCode' . ucfirst($method);
+
+
+	#	if($self->can($error_method)){
+	#		$self->$error_method(@args);
+	#	}
+	#	else{
+	#		die($method . " : error code " . $args[0]);
+	#	}
+	#}
+	#else{
+	#	die('Unknow error: ' . $reason);
+	#}
 }
 
 1;

@@ -4,6 +4,7 @@ use strict;
 use Eixo::Base::Clase;
 use URI;
 use LWP::UserAgent;
+use JSON;
 
 my $REQ_PARSER = qr/([a-z]+)([A-Z]\w+?)$/;
 
@@ -13,6 +14,8 @@ has(
 	endpoint=>undef,
 	format=>'json',
 	flog=>undef,
+	error_callback => undef,
+	current_method => undef,
 );
 
 sub initialize{
@@ -40,16 +43,22 @@ sub ua {
 }
 
 
+
 sub AUTOLOAD{
 	my ($self, %args) = @_;
 
 	my ($method, $entity) = our $AUTOLOAD =~ $REQ_PARSER;
+	
+	# store current method for tracing
+	$self->current_method($method.$entity);
 
 	$entity = lc($entity);
 
 	unless(grep { $method eq $_ } qw(put get post delete patch)){
 		die(ref($self) . ': UNKNOW METHOD: ' . $method);
 	}
+
+
 
 	my ($id, $action);
 
@@ -71,6 +80,8 @@ sub AUTOLOAD{
 
 	return $res;
 }
+
+sub DESTROY {}
 
 sub patch{
 }
@@ -128,12 +139,34 @@ sub __send{
 	my $res = $self->ua->request($req);
 
 	if($res->is_success){
-		return $res->content;
+		if ($self->format eq 'json'){
+			return JSON->new->decode($res->content);
+		}
 	}
 	else{
-		die "Api error: (".$res->status_line."). ".$res->content."\n";
+		$self->remote_error(
+				$res->code,
+				$res->content
+			);
 	}
 
+}
+
+sub remote_error {
+	my ($self,$status, @extra_args) = @_;
+
+	if(defined($self->error_callback)){
+		&{$self->error_callback}(
+			$self->current_method,
+			'ERROR_CODE',
+			$status,
+			@extra_args
+			
+		);
+	}
+	else{
+		die "Remote Api error: (".$status."). Details: ".join(',', @extra_args)."\n";
+	}
 }
 
 
