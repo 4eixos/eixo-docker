@@ -50,7 +50,9 @@ sub has{
 
 		my ($self) = @_;
 
-		$self->$_($attributes{$_}) foreach(keys %attributes);
+		foreach(keys %attributes){
+			$self->{$_} = $attributes{$_};
+		}
 	};  
 }
 

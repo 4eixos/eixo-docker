@@ -10,7 +10,10 @@ has (
 	n => 55,
 	o => 'aaa',
 	p => {},
-	a => []
+	a => [],
+	nulo=>undef,
+	vacio=>0,
+	nada=>''
 
 );
 
@@ -22,6 +25,8 @@ use Data::Dumper;
 use JSON;
 
 my $aa = AA->new;
+
+die(Dumper($aa));
 
 my @m = qw(n o p a);
 
