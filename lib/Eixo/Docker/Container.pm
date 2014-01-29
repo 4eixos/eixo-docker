@@ -7,6 +7,7 @@ use parent qw(Eixo::Rest::Product);
 use Eixo::Docker::Config;
 use Eixo::Docker::ContainerResume;
 use Eixo::Docker::ContainerException;
+use Eixo::Docker::HostConfig;
 
 my $DEFAULT_TIMEOUT = 30;
 

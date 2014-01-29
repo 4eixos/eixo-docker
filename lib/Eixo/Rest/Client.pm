@@ -106,7 +106,7 @@ sub post : __log {
 
     my $content = JSON->new->allow_blessed(1)
                             ->convert_blessed(1)
-                            ->encode($args{POST_DATA});
+                            ->encode($args{POST_DATA} || {});
 
     $req->content($content);
 	
@@ -173,10 +173,10 @@ sub __send{
 
 	my ($self, $req) = @_;
 	my $uri = $req->uri;
-    # print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
+     	#print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
 
 	my $res = $self->ua->request($req);
-    # print "Response: ".Dumper($res)."\n";
+     	#print "Response: ".Dumper($res)."\n";
 
 	if($res->is_success){
 		if($res->content){

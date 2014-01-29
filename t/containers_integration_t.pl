@@ -1,34 +1,24 @@
-use strict;
-use warnings;
-
-use lib './lib';
-use Test::More;
-use Data::Dumper;
-use JSON;
+use t::test_base;
 
 use Eixo::Docker::Api;
-
-my @calls;
 
 my $a = Eixo::Docker::Api->new("http://localhost:4243");
 
 #
-# Set a logger sub
+# Set a debugger sub
 #
 $a->client->flog(sub {
 
 	my ($api_ref, $data, $args) = @_;
-
-	print "-> Entering in Method '".join("->", @$data)."' with Args (".join(',',@$args).")\n";
+	#print "-> Entering in Method '".join("->", @$data)."' with Args (".join(',',@$args).")\n";
 
 });
 
 
-# testing containers api methods
+# testing containers get methods
 
 my $lista = $a->containers->getAll();
 ok(ref $lista eq 'ARRAY', "'API->containers->getAll()' returns a list of containers");
-#print Dumper($lista);
 
 # exceptions
 eval {
@@ -36,23 +26,31 @@ eval {
 };
 ok($@->error eq 'Param needed', "Launch exception for required params not found");
 
-my $id_ko = "340f03a2c2cfxx";
-eval{
-	my $c = $a->containers->get(id => $id_ko);
-	print Dumper($c);
-};
-ok($@->error eq 'No such container', "Launch exception for non existent container with id $id_ko");
-#print Dumper($@);
 
-# create
+eval{
+	my $id_ko = "340f03a2c2cfxx";
+	my $c = $a->containers->get(id => $id_ko);
+};
+ok($@->error eq 'No such container', "Launch exception for non existent container");
+
+#
+# TEST CONTAINER LIFECYCLE
+#
 # 0. Drop container testing123 if exists
 print "Cleaning\n";
 eval {
 	my $c = $a->containers->getByName("testing123");
-    $a->containers->delete(id => $c->ID) if($c);
+	if($c){
+		&change_state($c, "down");
+    		$a->containers->delete(id => $c->ID, v => 1);
+	}
 };
+die(Dumper($@)) if($@);
 
-# 1. create container
+#
+# create container
+#
+
 $@ = undef;
 my $c = undef;
 my $memory = 128*1024*1024; #128MB
@@ -61,52 +59,69 @@ my %h = (
 
 	Hostname => 'test',
 	Memory => $memory,
-	Cmd => ["bash","-l"],
+	Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
 	Image => "ubuntu",
-    Name => "testing123",
+	Name => "testing123",
 );
 
 eval{
 	$c = $a->containers->create(%h);
 };
-ok(!$@, "New container created".Dumper($@));
+ok(!$@, "New container created");
 ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
 
-# 2 . test created container
+#
+# test created container and start
+#
 eval {
     $c = $a->containers->getByName("testing123");
+   
 };
 ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
-#die(Dumper($c));
 
-# print Dumper($c->status());
-# eval{
-# 	$c->stop(t => 10);
-# };
-# ok(!$@ && !$c->status()->{Running}, "Test container has been stopped");
-# print(Dumper($c->status()));
+ok( 
+	&change_state($c, "up"), 
+	"The container has been started"
+);
 
-# eval{
-# 	$c->start();
-# };
-# ok(!$@ && $c->status()->{Running}, "Test container has been started");
+#
+# stop container
+#
+eval{
+	&change_state($c, "down");
+};
+ok(!$@ && !$c->status()->{Running}, "Test container has been stopped");
 
-# eval{
-# 	$c->restart(t => 10);
-# };
-# ok(!$@ && $c->status()->{Running}, "Test container has been restarted");
+#
+# check restart
+#
+eval{
+	&change_state($c, "up");
+};
+ok(!$@ && $c->status()->{Running}, "Test container has been started again");
 
-# eval{
-# 	$c->restart(t => 10);
-# };
-# ok(!$@ && !$c->status()->{Running}, "Test container has been killed");
+
+eval{
+	$c->restart(t => 10);
+};
+ok(!$@ && $c->status()->{Running}, "Test container has been restarted");
+
+
+#
+# kill
+#
+eval{
+	$c->kill(t => 10);
+};
+ok(!$@ && !$c->status()->{Running}, "Test container has been killed");
 
 #$c->copyFile("path_to_file");
 
-
-# 4. drop created container
+#
+#  drop created container
+#
 eval{
-	$a->containers->delete(id => $c->ID);
+	$c->delete(delete_volumes => 1);
 };
 ok(!$@, "Container deleted");
 
