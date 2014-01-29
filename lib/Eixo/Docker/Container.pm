@@ -8,6 +8,8 @@ use Eixo::Docker::Config;
 use Eixo::Docker::ContainerResume;
 use Eixo::Docker::ContainerException;
 
+my $DEFAULT_TIMEOUT = 30;
+
 has(
 
 	Config => {},
@@ -45,6 +47,8 @@ sub initialize {
 
 sub get{
 	my ($self, %args) = @_;
+    $args{id} = $self->ID if($self->ID);
+
 
 	$self->populate(
 
@@ -112,7 +116,7 @@ sub create {
     }
 
 	# validate attrs and initialize default values not setted
-	my $config = Eixo::Docker::Config->new->populate(\%attrs);
+	my $config = Eixo::Docker::Config->new(%attrs);
 	
 	$args->{action} = 'create';
 	$args->{POST_DATA}  = $config;
@@ -131,6 +135,8 @@ sub create {
 
 sub delete{
 	my ($self, %args) = @_;
+    $args{id} = $self->ID if($self->ID);
+
 
     my $delete_volumes = (exists($args{delete_volumes}))? 
                             $args{delete_volumes}:
@@ -150,6 +156,69 @@ sub delete{
 
 }
 
+
+sub status{
+    my ($self, %args) = @_;
+
+    $self->get(%args)->State;
+}
+
+
+sub start {
+    my ($self, %args) = @_;
+
+    my $config = Eixo::Docker::HostConfig->new->populate(\%args);
+
+    $args{POST_DATA}  = $config;
+
+    $self->__exec("start", %args);
+
+
+}
+
+sub stop {
+    my ($self, %args) = @_;
+
+    $args{GET_DATA}->{t} =  (exists($args{timeout}))? 
+                                $args{timeout}:
+                                (exists($args{t}))? 
+                                    $args{t} : $DEFAULT_TIMEOUT;
+    $self->__exec("stop", %args);
+    
+}
+
+
+sub restart {
+    my ($self, %args) = @_;
+
+    $args{GET_DATA}->{t} =  (exists($args{timeout}))? 
+                                $args{timeout}:
+                                (exists($args{t}))? 
+                                    $args{t} : $DEFAULT_TIMEOUT;
+    $self->__exec("restart", %args);
+
+}
+
+sub kill {
+    my ($self, %args) = @_;
+
+    $self->__exec("kill", %args);
+
+}
+
+
+sub __exec {
+    my ($self, $action, %args) = @_;
+
+    $args{id} = $self->ID if($self->ID);
+
+    $args{action} = $action;
+
+    $self->api->postContainers(
+        needed => [qw(id)],
+        args => \%args,
+    );
+}
 
 sub __error {
 	my ($self, $method, $reason,@args) = @_;

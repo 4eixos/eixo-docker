@@ -18,7 +18,7 @@ my $a = Eixo::Docker::Api->new("http://localhost:4243");
 $a->client->flog(sub {
 
 	my ($api_ref, $data, $args) = @_;
-	
+
 	print "-> Entering in Method '".join("->", @$data)."' with Args (".join(',',@$args).")\n";
 
 });
@@ -61,7 +61,7 @@ my %h = (
 
 	Hostname => 'test',
 	Memory => $memory,
-	Cmd => ["bash"],
+	Cmd => ["bash","-l"],
 	Image => "ubuntu",
     Name => "testing123",
 );
@@ -69,7 +69,7 @@ my %h = (
 eval{
 	$c = $a->containers->create(%h);
 };
-ok(!$@, "New container created");
+ok(!$@, "New container created".Dumper($@));
 ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
 
 # 2 . test created container
@@ -79,10 +79,28 @@ eval {
 ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
 #die(Dumper($c));
 
-#$c->stop;
-#$c->start;
-#$c->status;
-#$c->kill;
+# print Dumper($c->status());
+# eval{
+# 	$c->stop(t => 10);
+# };
+# ok(!$@ && !$c->status()->{Running}, "Test container has been stopped");
+# print(Dumper($c->status()));
+
+# eval{
+# 	$c->start();
+# };
+# ok(!$@ && $c->status()->{Running}, "Test container has been started");
+
+# eval{
+# 	$c->restart(t => 10);
+# };
+# ok(!$@ && $c->status()->{Running}, "Test container has been restarted");
+
+# eval{
+# 	$c->restart(t => 10);
+# };
+# ok(!$@ && !$c->status()->{Running}, "Test container has been killed");
+
 #$c->copyFile("path_to_file");
 
 

@@ -31,4 +31,8 @@ has(
 	NetworkDisabled=>undef,
 );
 
+# sub TO_JSON {
+# 	my $self = $_[0];
 
+# 	$self->AttachStdin
+# }
