@@ -22,6 +22,10 @@ $a->flog(sub {
     push @calls, $data->[1];
 
 });
+
+
+$a->images->create(fromImage=>'busybox');
+
 #$a->images->getAll();
 #$a->images->get($id);
 #$a->images->create();
