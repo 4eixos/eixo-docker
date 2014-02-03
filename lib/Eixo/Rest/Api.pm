@@ -63,9 +63,12 @@ sub __analyzeRequest{
 		foreach (@{$args{needed}}){
 
 			&{$self->client->error_callback}(
+
 				$method, 
+
 				'PARAM_NEEDED', 
-				$_) unless(exists($args{args}->{$_}));
+
+				$_ ) unless(exists($args{args}->{$_}));
 
 		}		
 

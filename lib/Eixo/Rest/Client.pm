@@ -8,6 +8,8 @@ use JSON -convert_blessed_universally;
 use Carp;
 use Data::Dumper;
 
+use Eixo::Rest::Request;
+
 my $REQ_PARSER = qr/\:\:([a-z]+)([A-Z]\w+?)$/;
 
 has(
@@ -72,6 +74,14 @@ sub AUTOLOAD{
 		delete($args{action});
 	}
 
+	if($args{PROCESS_DATA}){
+		$args{'__client_send_method'} = '__sendAdHoc';
+	}
+	else{
+		$args{'__client_send_method'} = '__send';
+	}
+
+
 	my $uri = $self->build_uri($entity, $id, $action);
     #print("Sending request to $uri with query ".$uri->query."\n");
 
@@ -92,7 +102,9 @@ sub get : __log {
 
 	my $req = HTTP::Request->new(GET => $uri);
 
-	$self->__send($req);
+	my $send_method = $args{__client_send_method};
+
+    $self->$send_method($req, %args);
 }
 
 sub post : __log {
@@ -101,7 +113,8 @@ sub post : __log {
     # Is possible to add query string args to post requests
     $uri->query_form($args{GET_DATA});
 
-	my $req = HTTP::Request->new(POST => $uri);
+    my $req = HTTP::Request->new(POST => $uri);
+
     $req->header('content-type' => 'application/json');
 
     my $content = JSON->new->allow_blessed(1)
@@ -109,9 +122,10 @@ sub post : __log {
                             ->encode($args{POST_DATA} || {});
 
     $req->content($content);
-	
-    
-	$self->__send($req);
+
+	my $send_method = $args{__client_send_method};
+
+    $self->$send_method($req, %args);
 }
 
 sub delete : __log {
@@ -170,8 +184,8 @@ sub generate_query_str {
 
 
 sub __send{
+	my ($self, $req, %args) = @_;
 
-	my ($self, $req) = @_;
 	my $uri = $req->uri;
      	#print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
 
@@ -191,6 +205,15 @@ sub __send{
 				$res->content
 			);
 	}
+
+}
+
+sub __sendAdHoc{
+	my ($self, $req, %args) = @_;
+
+	my $uri = $req->uri;
+
+	Eixo::Rest::Request->new(%{$args{PROCESS_DATA}})->send($self->ua, $req);
 
 }
 
