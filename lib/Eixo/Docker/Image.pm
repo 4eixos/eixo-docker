@@ -67,7 +67,6 @@ sub getAll{
 sub create{
 	my ($self, %args) = @_;
 
-
 	$args{fromImage} || $args{fromSrc} || $self->api->client->error_callback->(
 
 		'ImageCreate',
@@ -81,17 +80,6 @@ sub create{
 	$args{action} = 'create';
 
 	$args{GET_DATA} = { map { $_ => $args{$_} } qw(fromImage fromSrc) }; 
-
-	$args{PROCESS_DATA} = {
-
-		onProgress => sub {
-
-			print $_[0] . "\n";
-
-		}
-
-	};
-
 
 	$self->api->postImages(
 

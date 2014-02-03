@@ -7,6 +7,32 @@ use Eixo::Rest::BaseException;
 
 has (api => undef);
 
+sub AUTOLOAD{
+	my ($self, @args) = @_;
+
+	#
+	# Searching for meaningful verbs
+	#	
+	my ($method) = our $AUTOLOAD =~ /\:\:(\w+)$/;
+
+	if(my ($original_method) = $method =~ /(\w+)Async$/){
+	
+		unless($self->can($original_method)){
+			die(ref($self) . '::UNKONW_METHOD: ' . $original_method + ' async') 	
+		}
+
+		$self->api->async(
+
+			$self,
+
+			$original_method,
+
+			@args,
+
+		);
+	}
+}
+
 sub populate{
 	my ($self, $values) = @_;
 

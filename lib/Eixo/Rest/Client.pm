@@ -8,9 +8,11 @@ use JSON -convert_blessed_universally;
 use Carp;
 use Data::Dumper;
 
-use Eixo::Rest::Request;
+use Eixo::Rest::RequestAsync;
 
 my $REQ_PARSER = qr/\:\:([a-z]+)([A-Z]\w+?)$/;
+
+my $USER_AGENT_VERSION = 'EixoAgent/0.1';
 
 has(
 
@@ -29,7 +31,7 @@ sub initialize{
 
 	die("API ENDPOINT NEEDED") unless($self->endpoint);
 
-	$self->ua("EixoAgent/0.1");
+	$self->ua($USER_AGENT_VERSION);
 
 	$self;
 }
@@ -123,7 +125,7 @@ sub post : __log {
 
     $req->content($content);
 
-	my $send_method = $args{__client_send_method};
+    my $send_method = $args{__client_send_method};
 
     $self->$send_method($req, %args);
 }
@@ -213,7 +215,16 @@ sub __sendAdHoc{
 
 	my $uri = $req->uri;
 
-	Eixo::Rest::Request->new(%{$args{PROCESS_DATA}})->send($self->ua, $req);
+	Eixo::Rest::RequestAsync->new(
+
+		%{$args{PROCESS_DATA}}
+	
+	)->send(
+
+		$self->ua($USER_AGENT_VERSION
+
+
+	), $req);
 
 }
 

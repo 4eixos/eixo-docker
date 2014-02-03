@@ -48,6 +48,43 @@ sub produce{
 	)
 }
 
+sub async{
+	my ($self, $product, $method, @args) = @_;
+	
+	my $on_end;
+
+	if(scalar(@args) % 2 != 0){
+		$on_end = pop(@args);
+	}
+
+	my %args = @args;
+
+
+	$args{PROCESS_DATA} = {
+
+		onSuccess=>$args{onSuccess} || $on_end || die(
+
+			ref($product) . '::' . $method . 'Async: callback is needed'
+
+		),
+		
+		onError=>$args{onError} || sub {
+		
+			$product->error(@_)
+
+		},
+
+		onProgress=>$args{onProgress},
+
+		onStart=>$args{onStart}
+
+
+	};
+
+	$product->$method(%args);
+
+}
+
 sub __analyzeRequest{
 	my ($self, $method, %args) = @_;
 
