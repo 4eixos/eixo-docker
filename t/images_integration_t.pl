@@ -24,65 +24,53 @@ $a->flog(sub {
 
 });
 
-my $i;
-#$a->images->createAsync(fromImage=>'busybox');#->async(
+eval{
+	#print $a->images->get(id=>'426130da57f7');
+
+	#print $a->images->getAsync(
+
+	#	id=>'426130da57f7', 
+
+	#	onSuccess=>sub {
+
+	##		print Dumper($_[0]);
+
+	#	}
+
+	#);
 
 
-my @list;
+	#$a->images->getAllAsync(
 
-#$a->images->createAsync(
-#
-#	fromImage=>'busybox',
-#
-#	sub {
-#		print "Terminado\n"
-#		push @list, \@_;
-#	}
-#
-#);
-#
-#my $img;
+	#	onSuccess=> sub {
 
-my @images = qw(fedora centos busybox);
+	#		print Dumper($_[0]);
 
-my @instaladas;
-my $todo_listo = undef;
+	#	}
 
-foreach my $img (@images){
+	#);
 
 	$a->images->createAsync(
-	
-		fromImage=>$img,
-		
-		onProgress=>sub {
 
-			print "$_[0]\n";	
+		fromImage=>'ubuntu',
 
-		},
-	
 		onSuccess=>sub {
-			
-			push @instaladas, $img;
-			print "Terminada instalacion $img\n\n";
+		
+			print "FINISHED\n";		
 
-			$todo_listo = 1 if(scalar(@instaladas) == scalar(@images));
-	
 		},
-	
-		onError=>sub{
-	
-		}
-	
+
+		onProgress=>sub{
+
+			print $_[0] . "\n";
+		}	
+
 	);
+
+	$a->waitForJobs;
+};
+if($@){
+	print Dumper($@);
 }
 
-while(!$todo_listo){
-	#select(undef, undef, undef, 0.25);
-	cede;
-}
-
-#$a->images->getAll();
-#$a->images->get($id);
-#$a->images->create();
-#$a->images->delete();
 done_testing();

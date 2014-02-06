@@ -32,36 +32,49 @@ sub get{
 
 	$args{id} = $self->Id if($self->Id);
 
-	$self->populate(
+	$self->api->getImages(
 
-		$self->api->getImages(
+		needed=>[qw(id)],
 
-			needed=>[qw(id)],
+		args=>\%args,
 
-			args=>\%args
-		)
+		__callback=>sub {
 
+			$self->populate($_[0]);
+
+		}
 	);
 
-	$self;
 }
 
 sub getAll{
-	my ($self) = @_;
+	my ($self, %args) = @_;
 
 	my $list = [];
 
-	my $args = {
-		GET_DATA=>{
-			all=>1
-		}
+	$args{GET_DATA} = { 
+		all=>1
 	};
 
-	foreach my $i (@{$self->api->getImages(args=>$args)}){
-		push @$list, $self->api->images->populate($i)
-	}
+	#foreach my $i (@{$self->api->getImages(args=>\%args)}){
+	#	push @$list, $self->api->images->populate($i)
+	#}
 
-	$list;
+	$self->api->getImages(
+
+		args=>\%args, 
+
+		__callback=>sub {
+
+ 			foreach(@{$_[0]}){
+				push @$list, $self->api->images->populate($_);
+			}
+
+			$list;
+		}
+
+	);
+
 }
 
 sub create{
@@ -88,7 +101,7 @@ sub create{
 		args=>\%args,
 	);
 
-	$self;
+	#$self;
 }
 
 1;

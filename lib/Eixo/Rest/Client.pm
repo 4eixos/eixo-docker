@@ -77,7 +77,7 @@ sub AUTOLOAD{
 	}
 
 	if($args{PROCESS_DATA}){
-		$args{'__client_send_method'} = '__sendAdHoc';
+		$args{'__client_send_method'} = '__sendAsync';
 	}
 	else{
 		$args{'__client_send_method'} = '__send';
@@ -106,7 +106,7 @@ sub get : __log {
 
 	my $send_method = $args{__client_send_method};
 
-    $self->$send_method($req, %args);
+    	$self->$send_method($req, %args);
 }
 
 sub post : __log {
@@ -193,11 +193,13 @@ sub __send{
 
 	my $res = $self->ua->request($req);
      	#print "Response: ".Dumper($res)."\n";
+	
+	my $response;
 
 	if($res->is_success){
 		if($res->content){
 			if ($self->format eq 'json' ){
-				return JSON->new->decode($res->content);
+				$response = JSON->new->decode($res->content);
 			}
 		}
 	}
@@ -208,23 +210,36 @@ sub __send{
 			);
 	}
 
+	if($args{__callback}){
+		return $args{__callback}->($response);
+	}
+	else{
+		return $response;
+	}
 }
 
-sub __sendAdHoc{
+sub __sendAsync{
 	my ($self, $req, %args) = @_;
 
 	my $uri = $req->uri;
 
 	Eixo::Rest::RequestAsync->new(
 
+		job_id=>$args{__job_id},
+
+		api=>$args{api},
+
+		callback=>$args{__callback},
+
 		%{$args{PROCESS_DATA}}
 	
 	)->send(
 
-		$self->ua($USER_AGENT_VERSION
+		$self->ua($USER_AGENT_VERSION), 
 
+		$req
 
-	), $req);
+	);
 
 }
 

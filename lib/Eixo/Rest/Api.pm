@@ -7,7 +7,15 @@ use Attribute::Handlers;
 use Eixo::Rest::Client;
 use Carp;
 
-has (client => undef);
+my $JOB_ID = 1;
+
+has (
+
+	client => undef,
+
+	jobs=>[],
+
+);
 
 sub AUTOLOAD{
 	my ($self, @args) = @_;
@@ -48,6 +56,50 @@ sub produce{
 	)
 }
 
+sub newJob{
+	my ($self, $request, $id) = @_;
+
+	push @{$self->jobs}, $request;
+
+	$self;
+}
+
+sub jobFinished{
+	my ($self, $request) = @_;
+
+	$self->jobs([ grep {
+
+		$_ != $request
+
+	} @{$self->jobs} ] );
+}
+
+sub waitForJob{
+	my ($self, $job_id) = @_;
+
+	$self->waitForJobs($job_id);
+	
+}
+
+sub waitForJobs{
+	my ($self, $id) = @_;
+
+	while(scalar(@{$self->jobs})){
+
+		if($id){
+			return unless(scalar(grep { $_->job_id == $id } @{$self->jobs}));
+		}
+
+		foreach my $job (@{$self->jobs}){
+
+			$job->process;
+
+			select(undef, undef, undef, 0.05);
+
+		}
+	}
+}
+
 sub async{
 	my ($self, $product, $method, @args) = @_;
 	
@@ -59,6 +111,7 @@ sub async{
 
 	my %args = @args;
 
+	$args{api} = $self;
 
 	$args{PROCESS_DATA} = {
 
@@ -81,8 +134,11 @@ sub async{
 
 	};
 
+	$args{__job_id} = $JOB_ID++;
+
 	$product->$method(%args);
 
+	return $args{__job_id};
 }
 
 sub __analyzeRequest{
@@ -111,9 +167,7 @@ sub __analyzeRequest{
 
 	}	
 
-
-
-	%{$args{args}};
+	%{$args{args}}, __callback=>$args{__callback};
 }
 
 sub __loadProduct{
