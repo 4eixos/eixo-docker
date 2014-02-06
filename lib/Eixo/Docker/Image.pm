@@ -68,6 +68,27 @@ sub get{
 
 }
 
+sub inspect{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->id if($self->id);
+	
+	$args{action} = 'json';
+	
+	$self->api->getImages(
+
+		needed=>[qw(id)],
+
+		args=>\%args,
+
+		__callback=>sub {
+
+		}
+
+	);
+
+}
+
 sub getAll{
 	my ($self, %args) = @_;
 
@@ -137,6 +158,8 @@ sub insertFile{
 	
 	$args{action} = 'insert';
 
+	$args{__format} = 'RAW';
+
 	$self->api->postImages(
 
 		needed=>[qw(url path id)],
@@ -147,9 +170,30 @@ sub insertFile{
 
 		__callback=>sub {
 
-			$self;			
+			#
+			# Take the last id and use it to get the new image
+			#
+			$_[0] =~ /\"\id\"\:\"([^"]+)\"\}$/;
 
-		}
+			$self->api->images->get(id=>substr($1, 0, 12));			
+		
+		},
+	
+
+	);
+}
+
+
+sub delete{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->id unless($args{id});
+
+	$self->api->deleteImages(
+
+		needed=>[qw(id)],
+		
+		args=>\%args
 
 	);
 }
