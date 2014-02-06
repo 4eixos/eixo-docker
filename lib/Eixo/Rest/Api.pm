@@ -136,6 +136,12 @@ sub async{
 
 	$args{__job_id} = $JOB_ID++;
 
+	$args{__callback} = $args{__callback} || sub {
+
+		return @_;
+
+	};
+
 	$product->$method(%args);
 
 	return $args{__job_id};

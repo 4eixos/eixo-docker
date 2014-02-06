@@ -99,6 +99,8 @@ sub create{
 	#	needed=>[qw(repo tag registry)],
 
 		args=>\%args,
+
+		__callback=>$args{__callback}
 	);
 
 	#$self;

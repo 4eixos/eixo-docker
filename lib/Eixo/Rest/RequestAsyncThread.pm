@@ -14,6 +14,8 @@ has (
 	req=>undef,
 	ua=>undef,
 
+	buffer=>'',
+
 );
 
 
@@ -53,6 +55,7 @@ sub process{
 	sub progress{
 		my ($self, $chunk, $req) = @_;
 
+		$self->buffer($self->buffer . $chunk);
 
 		$self->queue->enqueue({
 
@@ -60,7 +63,7 @@ sub process{
 
 			chunk=>$chunk,
 
-			req=>$req
+			req=>$req->content
 		});
 	}
 

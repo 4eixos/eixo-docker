@@ -45,10 +45,9 @@ sub end{
 
 	$_[0]->api->jobFinished($_[0]);
 
-
 	&{$_[0]->onSuccess}(
 	
-		$_[0]->callback->(JSON->new->decode($_[1])),
+		$_[0]->callback->(JSON->new->decode($_[1] || '{}')),
 
 		$_[1]
 	);
@@ -72,6 +71,8 @@ sub process{
 	my ($self) = @_;
 
 	while(my $task = $self->queue->dequeue_nb()){
+
+		use Data::Dumper; print Dumper($task);
 
 		if($task->{type} eq 'PROGRESS'){
 			$self->progress($task->{chunk}, $task->{req});
