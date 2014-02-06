@@ -230,6 +230,30 @@ sub kill {
 
 }
 
+sub copy{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->ID unless($args{id});
+	$args{action} = 'copy';
+
+	$args{__format} = 'RAW';
+
+	$self->api->postContainers(
+
+		needed=>[qw(Resource)],
+
+		args=>\%args,
+	
+		post_params=>[qw(Resource)],
+
+		__callback=>sub {
+
+			return $_[0];
+
+		}
+	);
+}
+
 
 sub __exec {
     my ($self, $action, %args) = @_;
@@ -239,8 +263,11 @@ sub __exec {
     $args{action} = $action;
 
     $self->api->postContainers(
+
         needed => [qw(id)],
+
         args => \%args,
+
     );
 }
 
@@ -248,9 +275,13 @@ sub __error {
 	my ($self, $method, $reason,@args) = @_;
 
 	Eixo::Docker::ContainerException->new(
+
 		method => $method, 
+
 		reason => $reason, 
+
 		args => \@args
+
 	)->raise();
 
 }
