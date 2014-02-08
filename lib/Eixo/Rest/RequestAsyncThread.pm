@@ -1,6 +1,5 @@
 package Eixo::Rest::RequestAsyncThread;
 
-use Coro;
 use strict;
 use Eixo::Base::Clase;
 
@@ -52,19 +51,20 @@ sub process{
 	threads->exit();
 }
 
-	sub progress{
-		my ($self, $chunk, $req) = @_;
 
-		$self->buffer($self->buffer . $chunk);
+sub progress{
+	my ($self, $chunk, $req) = @_;
 
-		$self->queue->enqueue({
+	$self->buffer($self->buffer . $chunk);
 
-			type=>'PROGRESS',
+	$self->queue->enqueue({
 
-			chunk=>$chunk,
+		type=>'PROGRESS',
 
-			req=>$req->content
-		});
-	}
+		chunk=>$chunk,
+
+		req=>$req->content
+	});
+}
 
 1;

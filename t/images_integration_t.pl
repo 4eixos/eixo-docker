@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 
-use Coro;
 use lib './lib';
 use Test::More;
 use Data::Dumper;
