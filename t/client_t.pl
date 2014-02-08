@@ -8,6 +8,7 @@ use JSON;
 use lib './lib';
 
 use Eixo::Rest::Client;
+#use_ok "Eixo::Rest::Client";
 
 # set log function
 # Eixo::Docker::Base::stashSet("f_log", sub {print join("\n",@_)});
@@ -21,7 +22,7 @@ my $a = Eixo::Rest::Client->new("http://localhost:4243");
 #
 $a->flog(sub {
 
-	my ($api_ref, $data, $args) = @_;
+my ($api_ref, $data, $args) = @_;
 
 	push @calls, $data->[1];
 
@@ -33,11 +34,10 @@ eval{
 	$a->noExiste;
 };
 
-ok($@ =~ /UNKNOW METHOD/, 'Controla metodos no existentes');
+ok($@ =~ /UNKNOW METHOD/, 'Non-existent Client methods launch exception');
 
-my $h = JSON->new->decode($a->getContainers(all => 1));
-
-print Dumper($h);
+my $h = $a->getContainers(all => 1);
+diag "Get all containers returns ". Dumper($h);
 
 ok(
 	ref $h eq "ARRAY", 
@@ -45,8 +45,6 @@ ok(
 );
 
 ok($calls[0] eq 'get', 'Method call has been logged');
-
-ok(ref JSON->new->decode($a->getContainers(id=>1)) eq 'HASH', "Show first container command return an hash");
 
 
 done_testing();
