@@ -31,6 +31,17 @@ sub AUTOLOAD{
 
 		);
 	}
+	# else{
+
+	# 	$self->api->sync(
+
+	# 		$self,
+
+	# 		$method,
+
+	# 		@args
+	# 	);
+	# }
 }
 
 sub populate{
@@ -51,9 +62,13 @@ sub error{
 	}
 	else{
 		Eixo::Rest::BaseException->new(
+
 			method => $method,
+			
 			reason => $reason,
+			
 			args => \@args,
+
 		)->raise();
 	}
 }

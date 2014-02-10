@@ -12,7 +12,7 @@ has (
 
 	onProgress => undef,
 	onSuccess =>  undef,
-	onFailure => undef,
+	onError => undef,
 	onStart => undef,
 	
 
@@ -42,6 +42,9 @@ sub error{
 	my ($self, $response) = @_;
 	#print "Error:".Dumper(@_); use Data::Dumper;
 	&{$self->onError}($response);
+	# 	$response->code,
+	# 	$response->content,
+	# );
 
 }
 
