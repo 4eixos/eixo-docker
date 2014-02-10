@@ -3,6 +3,7 @@ package Eixo::Rest::Api;
 use strict;
 use Eixo::Base::Clase;
 
+use Data::Dumper;
 use Attribute::Handlers;
 use Eixo::Rest::Client;
 use Carp;
@@ -100,61 +101,15 @@ sub waitForJobs{
 	}
 }
 
-sub async{
-	my ($self, $product, $method, @args) = @_;
-	
-	my $on_end;
-
-	if(scalar(@args) % 2 != 0){
-		$on_end = pop(@args);
-	}
-
-	my %args = @args;
-
-	$args{api} = $self;
-
-	$args{PROCESS_DATA} = {
-
-		onSuccess=>$args{onSuccess} || $on_end || die(
-
-			ref($product) . '::' . $method . 'Async: callback is needed'
-
-		),
-		
-		onError=>$args{onError} || sub {
-		
-			$product->error(@_)
-
-		},
-
-		onProgress=>$args{onProgress},
-
-		onStart=>$args{onStart}
-
-
-	};
-
-	$args{__job_id} = $JOB_ID++;
-
-	$args{__callback} = $args{__callback} || sub {
-
-		return @_;
-
-	};
-
-	$product->$method(%args);
-
-	return $args{__job_id};
-}
-
-sub __analyzeRequest{
+sub __analyzeRequest {
 	my ($self, $method, %args) = @_;
 
-	# set client error callback for request if exists
-	# Always is defined an error callback by default
-	if(exists $args{onError}){
-		$self->client->error_callback($args{onError});
-	}
+	my $params = $args{args};
+
+	# print "params:".Dumper($params);
+	# if(exists $args{onError}){
+	# 	$self->client->error_callback($args{onError});
+	# }
 
 	# check args needed
 	if($args{needed}){
@@ -167,14 +122,112 @@ sub __analyzeRequest{
 
 				'PARAM_NEEDED', 
 
-				$_ ) unless(exists($args{args}->{$_}));
+				$_ ) unless(exists($params->{$_}));
 
 		}		
 
 	}	
 
-	%{$args{args}}, __callback=>$args{__callback};
+	# build GET_DATA & POST_DATA
+	unless(exists($params->{GET_DATA})){
+		$params->{GET_DATA} = {map {$_ => $params->{$_}} @{$args{GET_PARAMS}}};
+	}
+	unless(exists($params->{POST_DATA})){
+		$params->{POST_DATA} = {map {$_ => $params->{$_}} @{$args{POST_PARAMS}}};
+	}
+	
+	delete($params->{$_}) foreach(@{$args{GET_PARAMS}}, @{$args{POST_PARAMS}});
+
+
+	# needed, maybe must die if not provided
+	$params->{__callback} = $args{__callback} || sub {
+
+		return @_;
+
+	};
+
+
+	# build PROCESS_DATA
+	$params->{PROCESS_DATA} = {
+
+		onSuccess=>$args{onSuccess} || $params->{onSuccess} || sub {return @_},
+		
+		onError=>$args{onError} || $params->{onError} ,
+
+		onProgress=>$args{onProgress} || $params->{onProgress},
+
+		onStart=>$args{onStart} || $params->{onStart}
+
+	};
+	delete($params->{$_}) foreach (qw(onStart onProgress onError onSuccess));
+
+	# print "PARAMS_PARSEADOS:".Dumper($params);
+
+	%$params;
+
 }
+
+sub async{
+	my ($self, $product, $method, @args) = @_;
+	
+	my $on_end;
+
+	if(scalar(@args) % 2 != 0){
+		$on_end = pop(@args);
+	}
+
+	my %args = @args;
+
+	$args{onSuccess} = $args{onSuccess} || $on_end || die(
+
+			ref($product) . '::' . $method . 'Async: callback is needed'
+
+	);
+
+	$args{api} = $self;
+
+	$args{__job_id} = $JOB_ID++;
+
+	# $args{__callback} = $args{__callback} || sub {
+
+	# 	return @_;
+
+	# };
+
+	$product->$method(%args);
+
+	return $args{__job_id};
+}
+
+
+# sub __analyzeRequest{
+# 	my ($self, $method, %args) = @_;
+
+# 	# set client error callback for request if exists
+# 	# Always is defined an error callback by default
+# 	if(exists $args{onError}){
+# 		$self->client->error_callback($args{onError});
+# 	}
+
+# 	# check args needed
+# 	if($args{needed}){
+
+# 		foreach (@{$args{needed}}){
+
+# 			&{$self->client->error_callback}(
+
+# 				$method, 
+
+# 				'PARAM_NEEDED', 
+
+# 				$_ ) unless(exists($args{args}->{$_}));
+
+# 		}		
+
+# 	}	
+
+# 	%{$args{args}}, __callback=>$args{__callback};
+# }
 
 sub __loadProduct{
 	my ($self, $class) = @_;
