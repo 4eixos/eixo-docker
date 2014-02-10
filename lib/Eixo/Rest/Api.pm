@@ -130,13 +130,24 @@ sub __analyzeRequest {
 
 	# build GET_DATA & POST_DATA
 	unless(exists($params->{GET_DATA})){
-		$params->{GET_DATA} = {map {$_ => $params->{$_}} @{$args{GET_PARAMS}}};
+
+		$params->{GET_DATA} = {
+
+			map {$_ => $params->{$_}} 
+				grep {exists($params->{$_})} 
+					@{$args{get_params}}
+		};
 	}
+
 	unless(exists($params->{POST_DATA})){
-		$params->{POST_DATA} = {map {$_ => $params->{$_}} @{$args{POST_PARAMS}}};
+		$params->{POST_DATA} = {
+			map {
+				$_ => $params->{$_}
+			} grep {exists($params->{$_})} @{$args{post_params}}
+		};
 	}
-	
-	delete($params->{$_}) foreach(@{$args{GET_PARAMS}}, @{$args{POST_PARAMS}});
+
+	delete($params->{$_}) foreach(@{$args{get_params}}, @{$args{post_params}});
 
 
 	# needed, maybe must die if not provided
@@ -152,7 +163,7 @@ sub __analyzeRequest {
 
 		onSuccess=>$args{onSuccess} || $params->{onSuccess} || sub {return @_},
 		
-		onError=>$args{onError} || $params->{onError} ,
+		onError=>$args{onError} || $params->{onError}, 
 
 		onProgress=>$args{onProgress} || $params->{onProgress},
 
@@ -188,46 +199,12 @@ sub async{
 
 	$args{__job_id} = $JOB_ID++;
 
-	# $args{__callback} = $args{__callback} || sub {
-
-	# 	return @_;
-
-	# };
-
 	$product->$method(%args);
 
 	return $args{__job_id};
 }
 
 
-# sub __analyzeRequest{
-# 	my ($self, $method, %args) = @_;
-
-# 	# set client error callback for request if exists
-# 	# Always is defined an error callback by default
-# 	if(exists $args{onError}){
-# 		$self->client->error_callback($args{onError});
-# 	}
-
-# 	# check args needed
-# 	if($args{needed}){
-
-# 		foreach (@{$args{needed}}){
-
-# 			&{$self->client->error_callback}(
-
-# 				$method, 
-
-# 				'PARAM_NEEDED', 
-
-# 				$_ ) unless(exists($args{args}->{$_}));
-
-# 		}		
-
-# 	}	
-
-# 	%{$args{args}}, __callback=>$args{__callback};
-# }
 
 sub __loadProduct{
 	my ($self, $class) = @_;

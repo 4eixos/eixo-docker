@@ -86,6 +86,16 @@ sub AUTOLOAD{
 	}
 
 
+	# set error_callback unless already established
+	unless(defined($args{PROCESS_DATA}->{onError})){
+	
+		$args{PROCESS_DATA}->{onError} = sub {
+	
+			$self->remote_error(@_);
+	
+		};
+	}
+
 	my $uri = $self->build_uri($entity, $id, $action);
     #print("Sending request to $uri with query ".$uri->query."\n");
 
@@ -195,7 +205,6 @@ sub generate_query_str {
 sub __send{
 	my ($self, $req, %args) = @_;
 
-
 	Eixo::Rest::RequestSync->new(
 		callback=>$args{__callback},
 
@@ -209,34 +218,6 @@ sub __send{
 
 	);
 
-	# my $uri = $req->uri;
- #     	#print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
-
-	# my $res = $self->ua->request($req);
- #     	#print "Response: ".Dumper($res)."\n";
-	
-	# my $response;
-
-	# if($res->is_success){
-	# 	if($res->content){
-	# 		if ($self->format eq 'json' ){
-	# 			$response = JSON->new->decode($res->content);
-	# 		}
-	# 	}
-	# }
-	# else{
-	# 	$self->remote_error(
-	# 			$res->code,
-	# 			$res->content
-	# 		);
-	# }
-
-	# if($args{__callback}){
-	# 	return $args{__callback}->($response);
-	# }
-	# else{
-	# 	return $response;
-	# }
 }
 
 sub __sendAsync{
@@ -263,19 +244,28 @@ sub __sendAsync{
 }
 
 sub remote_error {
-	my ($self,$status, @extra_args) = @_;
+	my ($self,$response) = @_;
+
+	my $status = $response->code;
+	my $extra = $response->content;
 
 	if(defined($self->error_callback)){
+
 		&{$self->error_callback}(
+
 			$self->current_method,
+
 			'ERROR_CODE',
+
 			$status,
-			@extra_args
+
+			$extra,
+			#@extra_args
 			
 		);
 	}
 	else{
-		die "Remote Api error: (".$status."). Details: ".join(',', @extra_args)."\n";
+		die "Remote Api error: ($status). Details: $extra\n";
 	}
 }
 
