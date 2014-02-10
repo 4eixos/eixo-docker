@@ -35,7 +35,7 @@ sub process{
 
 			type=>'END',
 
-			res=>$res->content
+			res=>$res
 		})
 	}
 	else{
