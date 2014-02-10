@@ -7,7 +7,7 @@ use Eixo::Rest::BaseException;
 use parent qw(Eixo::Rest::BaseException);
 
 
-my $ERROR_CODES = {
+my $ERRORS = {
 	404 => "No such container",
 	400 => "Bad parameter",
 	406 => "Impossible to attach (container not running)",
@@ -20,8 +20,8 @@ sub ERROR_CODE {
 
 	my $error_code = $self->args->[0];
 
-	if (exists($ERROR_CODES->{$error_code})){
-		$self->error($ERROR_CODES->{$error_code});
+	if (exists($ERRORS->{$error_code})){
+		$self->error($ERRORS->{$error_code});
 		$self->error_details('Error produced in \''.$self->method.'\' api call. Details: '.join(' - ', @{$self->args}));
 	}
 	else{

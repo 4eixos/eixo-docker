@@ -51,7 +51,6 @@ sub get{
     $args{id} = $self->ID if($self->ID);
 
 
-
 	$self->api->getContainers(
 
 		needed=>[qw(id)],
@@ -101,7 +100,7 @@ sub getAll {
 
         args => $args,
 
-        GET_PARAMS => [qw(all)],
+        get_params => [qw(all)],
 
         __callback => sub {
 
@@ -136,12 +135,18 @@ sub create {
 
 	my $res = $self->api->postContainers(
 			args => $args,
+
+            __callback => sub {
+                my $result = $_[0];
+
+                #return container fully loaded
+
+                $self->get(id => $result->{Id});
+
+            }
 	);
 
-    my $id = $res->{Id};
-
-    #return container fully loaded
-    $self->get(id => $id);
+    $self;
 
 }
 

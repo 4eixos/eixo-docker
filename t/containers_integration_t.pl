@@ -18,7 +18,7 @@ $a->client->flog(sub {
 # testing containers get methods
 
 my $lista = $a->containers->getAll();
-ok(ref $lista eq 'ARRAY', "'API->containers->getAll()' returns a list of containers");
+ok(ref $lista eq 'ARRAY', "'containers->getAll()' returns a list of containers");
 
 # exceptions
 eval {
