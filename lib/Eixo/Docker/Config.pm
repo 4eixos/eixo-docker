@@ -29,10 +29,7 @@ has(
 	CpuShares=>undef,
 	Domainname=>undef,
 	NetworkDisabled=>undef,
+	OnBuild => undef,
 );
 
-# sub TO_JSON {
-# 	my $self = $_[0];
-
-# 	$self->AttachStdin
-# }
+1;
