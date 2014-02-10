@@ -40,7 +40,7 @@ sub end{
 
 sub error{
 	my ($self, $response) = @_;
-	#print "Error:".Dumper(@_); use Data::Dumper;
+
 	&{$self->onError}($response);
 	# 	$response->code,
 	# 	$response->content,

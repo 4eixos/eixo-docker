@@ -33,10 +33,18 @@ $@ = undef;
 eval{
 	$a->noExiste;
 };
-
 ok($@ =~ /UNKNOW METHOD/, 'Non-existent Client methods launch exception');
 
-my $h = $a->getContainers(all => 1);
+my $process_data = {
+    onSuccess => sub {return $_[0]},
+};
+my $callback = sub {$_[0]};
+
+my $h = $a->getContainers(
+    GET_DATA => {all => 1},
+    PROCESS_DATA => $process_data,
+    __callback => $callback
+);
 diag "Get all containers returns ". Dumper($h);
 
 ok(
