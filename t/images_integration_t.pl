@@ -26,16 +26,31 @@ $a->flog(sub {
 my @res;
 
 eval{
-	my $image = $a->images->get(id => "cca28c7ea449");
+    $a->images->create(
+
+        fromImage=>'busybox',
+
+        onSuccess=>sub {
+        
+            print "FINISHED\n";     
+
+        },
+
+        onProgress=>sub{
+
+            print $_[0] . "\n";
+        }   
+
+    );
+
+	my $image = $a->images->get(id => "busybox");
 	 ok(
-	 	ref $image eq "Eixo::Docker::Image" && $image->id =~ /^cca28c7ea449/, 
-	 	"Images::get returns a docker image if exists"
+	 	ref $image eq "Eixo::Docker::Image" && $image->id =~ /^769b9341d937/, 
+	 	"Images::get returns the busybox docker image if exists"
 	 );
 
 	 $a->images->getAsync(
-
-	 	# id=>'426130da57f7', 
-	 	id => 'cca28c7ea449',
+	 	id => 'busybox',
 	 	onSuccess=>sub {
 
 	 #		print Dumper($_[0]);
@@ -64,22 +79,12 @@ eval{
     $a->waitForJobs;
     ok(ref $res eq "ARRAY", "List images returns an array");
 
-	# $a->images->createAsync(
-
-	# 	fromImage=>'ubuntu',
-
-	# 	onSuccess=>sub {
-		
-	# 		print "FINISHED\n";		
-
-	# 	},
-
-	# 	onProgress=>sub{
-
-	# 		print $_[0] . "\n";
-	# 	}	
-
-	# );
+    ok(
+        scalar(
+            grep {$_ =~ /^busybox/} map {@{$_->RepoTags}} @$res
+        ), 
+        "Find busybox image in image list"
+    );
 
 };
 if($@){

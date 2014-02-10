@@ -81,6 +81,8 @@ sub getAll{
 
 		args=>\%args, 
 
+		get_data => [qw(all)],
+
 		__callback=>sub {
 
  			foreach(@{$_[0]}){
