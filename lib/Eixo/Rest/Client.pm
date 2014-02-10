@@ -9,6 +9,8 @@ use Carp;
 use Data::Dumper;
 
 use Eixo::Rest::RequestAsync;
+use Eixo::Rest::RequestSync;
+
 
 my $REQ_PARSER = qr/\:\:([a-z]+)([A-Z]\w+?)$/;
 
@@ -76,7 +78,7 @@ sub AUTOLOAD{
 		delete($args{action});
 	}
 
-	if($args{PROCESS_DATA}){
+	if($args{__job_id}){
 		$args{'__client_send_method'} = '__sendAsync';
 	}
 	else{
@@ -106,7 +108,7 @@ sub get : __log {
 
 	my $send_method = $args{__client_send_method};
 
-    	$self->$send_method($req, %args);
+    $self->$send_method($req, %args);
 }
 
 sub post : __log {
@@ -138,7 +140,9 @@ sub delete : __log {
 
 	my $req = HTTP::Request->new(DELETE => $uri);
 
-	$self->__send($req);
+    my $send_method = $args{__client_send_method};
+
+    $self->$send_method($req, %args);
 }
 
 sub patch :__log {
@@ -148,7 +152,9 @@ sub patch :__log {
 
 	my $req = HTTP::Request->new(PATCH => $uri);
 
-	$self->__send($req);
+    my $send_method = $args{__client_send_method};
+
+    $self->$send_method($req, %args);
 
 }
 
@@ -159,8 +165,9 @@ sub put :__log {
 
 	my $req = HTTP::Request->new(PUT=> $uri);
 
-	$self->__send($req);
+    my $send_method = $args{__client_send_method};
 
+    $self->$send_method($req, %args);
 }
 
 
@@ -188,40 +195,52 @@ sub generate_query_str {
 sub __send{
 	my ($self, $req, %args) = @_;
 
-	my $uri = $req->uri;
-     	#print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
 
-	my $res = $self->ua->request($req);
-     	#print "Response: ".Dumper($res)."\n";
+	Eixo::Rest::RequestSync->new(
+		callback=>$args{__callback},
+
+		%{$args{PROCESS_DATA}}
 	
-	my $response;
+	)->send(
 
-	if($res->is_success){
-		if($res->content){
-			if ($self->format eq 'json' ){
-				$response = JSON->new->decode($res->content);
-			}
-		}
-	}
-	else{
-		$self->remote_error(
-				$res->code,
-				$res->content
-			);
-	}
+		$self->ua($USER_AGENT_VERSION), 
 
-	if($args{__callback}){
-		return $args{__callback}->($response);
-	}
-	else{
-		return $response;
-	}
+		$req
+
+	);
+
+	# my $uri = $req->uri;
+ #     	#print "Sending request $uri with method ".$req->method. " and content ".$req->content."\n";
+
+	# my $res = $self->ua->request($req);
+ #     	#print "Response: ".Dumper($res)."\n";
+	
+	# my $response;
+
+	# if($res->is_success){
+	# 	if($res->content){
+	# 		if ($self->format eq 'json' ){
+	# 			$response = JSON->new->decode($res->content);
+	# 		}
+	# 	}
+	# }
+	# else{
+	# 	$self->remote_error(
+	# 			$res->code,
+	# 			$res->content
+	# 		);
+	# }
+
+	# if($args{__callback}){
+	# 	return $args{__callback}->($response);
+	# }
+	# else{
+	# 	return $response;
+	# }
 }
 
 sub __sendAsync{
 	my ($self, $req, %args) = @_;
-
-	my $uri = $req->uri;
 
 	Eixo::Rest::RequestAsync->new(
 
