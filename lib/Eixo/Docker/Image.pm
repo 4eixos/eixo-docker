@@ -4,16 +4,25 @@ use strict;
 use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
-has(
+use Eixo::Docker::Config;
+use Eixo::Docker::ImageResume;
 
-	RepoTags => [],
-	Id => undef,
-	Created=>undef,
-	Size=>undef,
-	VirtualSize=>undef,
-	ParentId=>undef,
+has(
+	id => undef,					#"id":"b750fe79269d2ec9a3c593ef05b4332b1d1a02a62b4accb2c21d589ff2f5f2dc",
+    parent => undef,				#"parent":"27cf784147099545",
+    created => undef,				#"created":"2013-03-23T22:24:18.818426-07:00",
+    container => undef, 			#"container":"3d67245a8d72ecf13f33dffac9f79dcdf70f75acb84d308770391510e0c23ad0",
+    container_config => {},			#"container_config":
+    Size => 0, 						#"Size": 6824592
+    config => {},
+    comment => undef,
+    architecture => undef,
+    docker_version => undef,
+    os => undef,
 
 );
+
+
 
 sub initialize{
 	my $self = $_[0];
@@ -30,7 +39,7 @@ sub initialize{
 sub get{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->Id if($self->Id);
+	$args{id} = $self->id if($self->id);
 
 	$self->api->getImages(
 
@@ -41,9 +50,19 @@ sub get{
 		__callback=>sub {
 
 			$self->populate($_[0]);
+			
+			if(my %h = %{$self->container_config}){
+				$self->container_config(Eixo::Docker::Config->new(%h));
+			}
+
+			if(my %h = %{$self->config}){
+				$self->config(Eixo::Docker::Config->new(%h));
+			}
 
 		}
 	);
+
+	$self;
 
 }
 
@@ -52,9 +71,7 @@ sub getAll{
 
 	my $list = [];
 
-	$args{GET_DATA} = { 
-		all=>1
-	};
+	$args{all} = 1;
 
 	#foreach my $i (@{$self->api->getImages(args=>\%args)}){
 	#	push @$list, $self->api->images->populate($i)
@@ -67,13 +84,16 @@ sub getAll{
 		__callback=>sub {
 
  			foreach(@{$_[0]}){
-				push @$list, $self->api->images->populate($_);
+				# push @$list, $self->api->images->populate($_);
+				push @$list, Eixo::Docker::ImageResume->new(%$_);
 			}
 
 			$list;
 		}
 
 	);
+
+	$list;
 
 }
 

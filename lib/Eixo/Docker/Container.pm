@@ -51,19 +51,23 @@ sub get{
     $args{id} = $self->ID if($self->ID);
 
 
-	$self->populate(
 
-		$self->api->getContainers(
+	$self->api->getContainers(
 
-			needed=>[qw(id)],
+		needed=>[qw(id)],
 
-			args=>\%args
+		args=>\%args,
 
-		)
-	);
+        __callback => sub {
+            $self->populate($_[0]);
+            # load config obj replacing config hash
+            if(my %h = %{$self->Config}){ 
+                $self->Config(Eixo::Docker::Config->new(%h))
+            }
 
-    # load config obj replacing config hash 
-	$self->Config(Eixo::Docker::Config->new->populate($self->Config));
+        },
+    );
+
 
 	$self;
 }
@@ -90,19 +94,27 @@ sub getAll {
 
 	my $list  = [];
 
-    my $args = {
-        GET_DATA => {
-            all => 1
+    my $args = {all => 1};
+
+    
+    $self->api->getContainers(
+
+        args => $args,
+
+        GET_PARAMS => [qw(all)],
+
+        __callback => sub {
+
+            foreach my $r (@{$_[0]}){
+
+                push @$list, Eixo::Docker::ContainerResume->new(%$r)
+            }
+
+            $list;
         }
-    };
+    );
 
-	foreach my $r (@{$self->api->getContainers(args => $args)}){
-
-		push @$list, Eixo::Docker::ContainerResume->new->populate($r)
-	}
-
-	return $list;
-	
+    $list;
 }
 
 

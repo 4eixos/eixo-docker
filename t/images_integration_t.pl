@@ -23,53 +23,68 @@ $a->flog(sub {
 
 });
 
+my @res;
+
 eval{
-	#print $a->images->get(id=>'426130da57f7');
+	my $image = $a->images->get(id => "cca28c7ea449");
+	 ok(
+	 	ref $image eq "Eixo::Docker::Image" && $image->id =~ /^cca28c7ea449/, 
+	 	"Images::get returns a docker image if exists"
+	 );
 
-	#print $a->images->getAsync(
+	 $a->images->getAsync(
 
-	#	id=>'426130da57f7', 
+	 	# id=>'426130da57f7', 
+	 	id => 'cca28c7ea449',
+	 	onSuccess=>sub {
 
-	#	onSuccess=>sub {
+	 #		print Dumper($_[0]);
+	 		print "Encontrada imagen 426...\n";
+	 		#print Dumper(@_);
+	 		push @res, $_[0];
 
-	##		print Dumper($_[0]);
+	 	},
+	 	onError => sub {
+	 		print "No se encontrou tal imaxen\n";
+	 		print Dumper(@_);
+	 	}
 
-	#	}
+	 );
+     $a->waitForJobs;
+     ok(scalar @res == 1 && ref($res[0]) eq "Eixo::Docker::Image", "Get image with an async request");
 
-	#);
+     my $res;
+     $a->images->getAllAsync(
 
+		onSuccess=> sub {
 
-	#$a->images->getAllAsync(
+            $res = $_[0];
+		}
+    );
+    $a->waitForJobs;
+    ok(ref $res eq "ARRAY", "List images returns an array");
 
-	#	onSuccess=> sub {
+	# $a->images->createAsync(
 
-	#		print Dumper($_[0]);
+	# 	fromImage=>'ubuntu',
 
-	#	}
-
-	#);
-
-	$a->images->createAsync(
-
-		fromImage=>'ubuntu',
-
-		onSuccess=>sub {
+	# 	onSuccess=>sub {
 		
-			print "FINISHED\n";		
+	# 		print "FINISHED\n";		
 
-		},
+	# 	},
 
-		onProgress=>sub{
+	# 	onProgress=>sub{
 
-			print $_[0] . "\n";
-		}	
+	# 		print $_[0] . "\n";
+	# 	}	
 
-	);
+	# );
 
-	$a->waitForJobs;
 };
 if($@){
 	print Dumper($@);
 }
+
 
 done_testing();
