@@ -8,6 +8,7 @@ use Eixo::Rest::Client;
 use Carp;
 
 has (
+	callback=>undef,
 
 	onProgress => undef,
 	onSuccess =>  undef,
@@ -27,35 +28,24 @@ sub start{
 
 sub end{
 
+	my ($self, $response) = @_;
+
+	&{$self->onSuccess}(
+	
+		$self->callback->(JSON->new->decode($response->content || '{}')),
+
+		# $_[1]
+	);
 }
 
 sub error{
-	die("EIQUI\n");
+	my ($self, $response) = @_;
+	#print "Error:".Dumper(@_); use Data::Dumper;
+	&{$self->onError}($response);
+
 }
 
-sub progress{
-	my ($self, $chunk, $req) = @_;
-	
-	$self->onProgress->($chunk, $req) if($self->onProgress);
-}	
+sub progress {die "MUST BE DEFINED"}
+sub send {die "MUST BE DEFINED"}
 
-sub send{
-	my ($self, $ua, $req) = @_;
-
-	$self->start();
-
-	my $res = $ua->request($req, sub {
-
-		$self->progress(@_);
-
-	});
-
-	if($res->is_success){
-		$self->end($res);
-	}
-	else{
-		$self->error($res);
-	}
-
-	$self;
-}
+1;

@@ -7,7 +7,9 @@ use Thread::Queue;
 
 use JSON -convert_blessed_universally;
 
-use Eixo::Base::Clase;
+# use Eixo::Base::Clase;
+use Eixo::Rest::Request;
+use parent qw(Eixo::Rest::Request);
 
 use Attribute::Handlers;
 use Eixo::Rest::Client;
@@ -18,69 +20,74 @@ use Eixo::Rest::RequestAsyncThread;
 has (
 
 	job_id=>undef,
-
-	callback=>undef,
-
 	api=>undef,
 
-	onProgress => undef,
-	onSuccess =>  undef,
-	onFailure => undef,
-	onStart => undef,
+	# callback=>undef,
+
+	# onProgress => undef,
+	# onSuccess =>  undef,
+	# onError => undef,
+	# onStart => undef,
 	
 	thread=>undef,
 	queue=>undef,
 
 );
 
-sub start{
-	my ($self) = @_;
+# sub start{
+# 	my ($self) = @_;
 
-	if($self->onStart){
-		$self->onStart->();
-	}
-}
+# 	if($self->onStart){
+# 		$self->onStart->();
+# 	}
+# }
 
-sub end{
+# sub end{
 
-	$_[0]->api->jobFinished($_[0]);
+# 	my ($self, $response) = @_;
 
-	&{$_[0]->onSuccess}(
+# 	$self->api->jobFinished($self);
+
+# 	&{$self->onSuccess}(
 	
-		$_[0]->callback->(JSON->new->decode($_[1] || '{}')),
+# 		$self->callback->(JSON->new->decode($reponse->content || '{}')),
 
-		$_[1]
-	);
-}
+# 		# $_[1]
+# 	);
+# }
 
-sub error{
+# sub error{
+# 	my ($self, $response) = @_;
 
-	$_[0]->api->jobFinished($_[0]);
+# 	$self->api->jobFinished($self);
+# 	#print "Error:".Dumper(@_); use Data::Dumper;
+# 	&{$self->onError}($response);
 
-	die("EIQUI\n");
-}
+# }
 
-sub progress{
-	my ($self, $chunk, $req) = @_;
+# sub progress{
+# 	my ($self, $chunk, $req) = @_;
 
-	$self->onProgress->($chunk, $req) if($self->onProgress);
+# 	$self->onProgress->($chunk, $req) if($self->onProgress);
 
-}	
+# }	
 
 sub process{
 	my ($self) = @_;
 
 	while(my $task = $self->queue->dequeue_nb()){
 
-		use Data::Dumper; print Dumper($task);
+		# use Data::Dumper; print Dumper($task);
 
 		if($task->{type} eq 'PROGRESS'){
 			$self->progress($task->{chunk}, $task->{req});
 		}	
 		elsif($task->{type} eq 'END'){
+			$self->api->jobFinished($self);
 			$self->end($task->{res});
 		}
 		else{
+			$self->api->jobFinished($self);
 			$self->error($task->{res});
 		}
 	}
