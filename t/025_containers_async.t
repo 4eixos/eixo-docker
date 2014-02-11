@@ -54,10 +54,14 @@ eval {
 	my $c = $a->containers->getByName("testing123");
 	if($c){
 		&change_state($c, "down");
-    		$a->containers->delete(id => $c->ID, v => 1);
+
+    		$a->containers->delete(
+			id => $c->ID, 
+			v => 1
+		);
 	}
 };
-die(Dumper($@)) if($@);
+die("Error cleaning: ".Dumper($@)) if($@);
 
 #
 # create container
@@ -100,18 +104,28 @@ eval {
 };
 ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
 
-ok( 
-	&change_state($c, "up"), 
-	"The container has been started"
+#
+# up and down in async mode
+#
+
+if(&is_down($c)){
+	my $job_id = $c->startAsync(sub {return @_});
+	
+	$a->waitForJob($job_id);
+	
+	ok(
+		&is_up($c), 
+		"Test container has been started ok in async mode"
+	);
+}
+
+my $job_id = $c->stopAsync(sub {return @_});
+$a->waitForJob($job_id);
+ok(
+	&is_down($c), 
+	"Test container has been stopped ok in async mode"
 );
 
-#
-# stop container
-#
-eval{
-	&change_state($c, "down");
-};
-ok(!$@ && !$c->status()->{Running}, "Test container has been stopped");
 
 #
 # check restart
@@ -123,7 +137,8 @@ ok(!$@ && $c->status()->{Running}, "Test container has been started again");
 
 
 eval{
-	$c->restart(t => 10);
+	my $job_id = $c->restartAsync(t => 10, sub {return @_});
+	$a->waitForJob($job_id);
 };
 ok(!$@ && $c->status()->{Running}, "Test container has been restarted");
 
@@ -132,7 +147,8 @@ ok(!$@ && $c->status()->{Running}, "Test container has been restarted");
 # kill
 #
 eval{
-	$c->kill(t => 10);
+	my $job_id = $c->killAsync(t => 10, sub {return @_});
+	$a->waitForJob($job_id);
 };
 ok(!$@ && !$c->status()->{Running}, "Test container has been killed");
 
@@ -142,7 +158,8 @@ ok(!$@ && !$c->status()->{Running}, "Test container has been killed");
 #  drop created container
 #
 eval{
-	$c->delete(delete_volumes => 1);
+	my $job_id = $c->deleteAsync(delete_volumes => 1, sub {return @_});
+	$a->waitForJob($job_id);
 };
 ok(!$@, "Container deleted");
 

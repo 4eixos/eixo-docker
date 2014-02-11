@@ -47,8 +47,8 @@ sub initialize {
 }
 
 sub get{
-
 	my ($self, %args) = @_;
+
 	$args{id} = $self->ID if($self->ID);
 
 	$self->api->getContainers(
@@ -84,11 +84,11 @@ sub getByName {
     
     #get all containers
     my $list = $self->getAll();
+
     foreach my $c (@$list){
         return $self->get(id => $c->Id) if (grep {$name eq $_} @{$c->Names});
     }
 
-	$self;
 }
 
 
@@ -159,8 +159,8 @@ sub create {
 
 sub delete{
 	my ($self, %args) = @_;
-    $args{id} = $self->ID if($self->ID);
 
+    $args{id} = $self->ID if($self->ID);
 
     my $delete_volumes = (exists($args{delete_volumes}))? 
                             $args{delete_volumes}:
