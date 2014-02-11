@@ -47,26 +47,29 @@ sub initialize {
 }
 
 sub get{
-	my ($self, %args) = @_;
-    $args{id} = $self->ID if($self->ID);
 
+	my ($self, %args) = @_;
+	$args{id} = $self->ID if($self->ID);
 
 	$self->api->getContainers(
 
 		needed=>[qw(id)],
 
 		args=>\%args,
+		
+		__callback => sub {
 
-        __callback => sub {
-            $self->populate($_[0]);
-            # load config obj replacing config hash
-            if(my %h = %{$self->Config}){ 
-                $self->Config(Eixo::Docker::Config->new(%h))
-            }
+			$self->populate($_[0]);
 
-        },
-    );
+			# load config obj replacing config hash
+			if(my %h = %{$self->Config}){ 
 
+				$self->Config(Eixo::Docker::Config->new(%h))
+			}
+
+			$self;
+		},
+	);
 
 	$self;
 }
@@ -84,6 +87,8 @@ sub getByName {
     foreach my $c (@$list){
         return $self->get(id => $c->Id) if (grep {$name eq $_} @{$c->Names});
     }
+
+	$self;
 }
 
 
@@ -93,7 +98,7 @@ sub getAll {
 
 	my $list  = [];
 
-    my $args = {all => 1};
+	my $args = {all => 1};
 
     
     $self->api->getContainers(
@@ -118,14 +123,13 @@ sub getAll {
 
 
 sub create {
+
 	my ($self , %attrs) = @_;
 
-    my $args = {};
+	my $args = \%attrs;
 
-    if(exists($attrs{Name})){
-        $args->{GET_DATA} = {name => $attrs{Name}};
-        delete($attrs{Name});
-    }
+	# convert args to correct params
+	$args->{name} = $attrs{Name} if(exists($attrs{Name}));
 
 	# validate attrs and initialize default values not setted
 	my $config = Eixo::Docker::Config->new(%attrs);
@@ -136,13 +140,15 @@ sub create {
 	my $res = $self->api->postContainers(
 			args => $args,
 
+			get_params => [qw(name)],
+
             __callback => sub {
                 my $result = $_[0];
 
                 #return container fully loaded
-
                 $self->get(id => $result->{Id});
 
+				$self;
             }
 	);
 

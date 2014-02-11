@@ -74,19 +74,21 @@ sub error{
 }
 
 sub NOT_SERIALIZE{
-	qw(api);
+	return qw(api);
 }
 
 sub is_serializable{
 	my ($self,$attribute) = @_;
 
-	return 1 unless(grep {$attribute eq $_} $self->NOT_SERIALIZE);
+	return undef if(grep {$attribute eq $_} $self->NOT_SERIALIZE);
+
+	return 1;
 }
 
 sub TO_JSON {
 	my $self = $_[0];
 
-	return map {$_ => $self->$_} grep {$self->is_serializable($_)} keys(%$self);
+	return {map {$_ => $self->$_} grep {$self->is_serializable($_)} keys(%$self)};
 }
 
 1;

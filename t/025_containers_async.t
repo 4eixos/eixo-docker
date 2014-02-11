@@ -78,16 +78,19 @@ my %h = (
 
 eval{
 	$a->containers->createAsync(
-        %h, 
-        onSuccess => sub {$c = $_[0]}
+		%h, 
+		onSuccess => sub {
+
+			$c = $_[0];
+		}
     );
     $a->waitForJobs;
 
 };
-ok(!$@, "New container created".Dumper($@));
-ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
+ok(!$@, "New container created");
+ok($c && $c->Config->Memory == $memory, "Memory correctly asigned.");
+die(Dumper($c)) unless($c);
 
-die("end");
 #
 # test created container and start
 #
