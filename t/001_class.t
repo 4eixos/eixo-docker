@@ -26,8 +26,6 @@ use JSON;
 
 my $aa = AA->new;
 
-die(Dumper($aa));
-
 my @m = qw(n o p a);
 
 is(scalar(@m), scalar(grep { $aa->can($_)} @m), 'Accessors have been created');
