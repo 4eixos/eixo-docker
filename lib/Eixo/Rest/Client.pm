@@ -206,10 +206,13 @@ sub __send{
 	my ($self, $req, %args) = @_;
 
 	Eixo::Rest::RequestSync->new(
+
 		callback=>$args{__callback},
 
-		%{$args{PROCESS_DATA}}
-	
+		%{$args{PROCESS_DATA}},
+
+		format=>$self->format	
+
 	)->send(
 
 		$self->ua($USER_AGENT_VERSION), 
@@ -231,7 +234,9 @@ sub __sendAsync{
 
 		callback=>$args{__callback},
 
-		%{$args{PROCESS_DATA}}
+		%{$args{PROCESS_DATA}},
+
+		format=>$self->format	
 	
 	)->send(
 

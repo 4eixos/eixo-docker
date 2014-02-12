@@ -15,6 +15,7 @@ has (
 	onError => undef,
 	onStart => undef,
 	
+	format=>'json'
 
 );
 
@@ -27,14 +28,12 @@ sub start{
 }
 
 sub end{
-
 	my ($self, $response) = @_;
 
 	&{$self->onSuccess}(
 	
-		$self->callback->(JSON->new->decode($response->content || '{}')),
+		$self->callback->($self->unmarshall($response)),
 
-		# $_[1]
 	);
 }
 
@@ -48,7 +47,30 @@ sub error{
 
 }
 
-sub progress {die "MUST BE DEFINED"}
-sub send {die "MUST BE DEFINED"}
+sub progress{
+    my ($self, $chunk, $req) = @_;
+
+    $self->onProgress->($chunk, $req) if($self->onProgress);
+}   
+
+sub process {die ref($_[0]) . "::process: MUST BE DEFINED"}
+
+sub send {die ref($_[0]) . "::send: MUST BE DEFINED"}
+
+sub unmarshall{
+	my ($self, $response) = @_;
+
+	my $content = $response->content;
+
+	if($self->format eq 'json'){
+
+		return JSON->new->decode($content || '{}')
+	}
+	else{
+		return $content;
+	}
+}
+
+
 
 1;
