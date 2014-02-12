@@ -29,8 +29,14 @@ my $request_async = Eixo::Rest::RequestAsync->new(
 	},
 
 	onSuccess=>sub{
-		$end = $_[0]->content;
-	}
+		$end = $_[0];
+	},
+
+	callback=>sub{
+		@_;
+	},
+
+	format=>'RAW'
 
 );
 
@@ -96,7 +102,7 @@ sub request{
 
 	for(1..$self->{t}){
 
-		$code->('CHUNK_' . $_);		
+		$code->('CHUNK_' . $_, $self);		
 
 		sleep(1);
 
