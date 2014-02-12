@@ -63,7 +63,7 @@ sub progress{
 
 		chunk=>$chunk,
 
-		req=>$req->content
+		req=>$req
 	});
 }
 

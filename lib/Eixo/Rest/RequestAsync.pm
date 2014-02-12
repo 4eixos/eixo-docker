@@ -34,44 +34,6 @@ has (
 
 );
 
-# sub start{
-# 	my ($self) = @_;
-
-# 	if($self->onStart){
-# 		$self->onStart->();
-# 	}
-# }
-
-# sub end{
-
-# 	my ($self, $response) = @_;
-
-# 	$self->api->jobFinished($self);
-
-# 	&{$self->onSuccess}(
-	
-# 		$self->callback->(JSON->new->decode($reponse->content || '{}')),
-
-# 		# $_[1]
-# 	);
-# }
-
-# sub error{
-# 	my ($self, $response) = @_;
-
-# 	$self->api->jobFinished($self);
-# 	#print "Error:".Dumper(@_); use Data::Dumper;
-# 	&{$self->onError}($response);
-
-# }
-
-# sub progress{
-# 	my ($self, $chunk, $req) = @_;
-
-# 	$self->onProgress->($chunk, $req) if($self->onProgress);
-
-# }	
-
 sub process{
 	my ($self) = @_;
 

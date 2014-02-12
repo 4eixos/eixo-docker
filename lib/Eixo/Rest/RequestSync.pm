@@ -4,12 +4,6 @@ use strict;
 use Eixo::Rest::Request;
 use parent qw(Eixo::Rest::Request);
 
-sub progress{
-    my ($self, $chunk, $req) = @_;
-
-    $self->onProgress->($chunk, $req) if($self->onProgress);
-
-}   
 
 
 
