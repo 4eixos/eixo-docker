@@ -122,7 +122,7 @@ sub __analyzeRequest {
 
 				'PARAM_NEEDED', 
 
-				$_ ) unless(exists($params->{$_}));
+				$_ ) unless(defined($params->{$_}));
 
 		}		
 
@@ -149,19 +149,27 @@ sub __analyzeRequest {
 
 	delete($params->{$_}) foreach(@{$args{get_params}}, @{$args{post_params}});
 
+	
+	# default callback function
+	#
+	# identity function
 
-	# needed, maybe must die if not provided
-	$params->{__callback} = $args{__callback} || sub {
+	my $default_func = sub {
 
-		return @_;
+		(wantarray)? @_ : $_[0];
 
 	};
+
+
+	# needed, maybe must die if not provided
+	$params->{__callback} = $args{__callback} || $default_func;
+
 
 
 	# build PROCESS_DATA
 	$params->{PROCESS_DATA} = {
 
-		onSuccess=>$args{onSuccess} || $params->{onSuccess} || sub {return @_},
+		onSuccess=>$args{onSuccess} || $params->{onSuccess} || $default_func,
 		
 		onError=>$args{onError} || $params->{onError}, 
 
