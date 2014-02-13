@@ -8,12 +8,12 @@ use Eixo::Docker::Config;
 use Eixo::Docker::ImageResume;
 
 has(
-	id => undef,					#"id":"b750fe79269d2ec9a3c593ef05b4332b1d1a02a62b4accb2c21d589ff2f5f2dc",
-    parent => undef,				#"parent":"27cf784147099545",
-    created => undef,				#"created":"2013-03-23T22:24:18.818426-07:00",
-    container => undef, 			#"container":"3d67245a8d72ecf13f33dffac9f79dcdf70f75acb84d308770391510e0c23ad0",
-    container_config => {},			#"container_config":
-    Size => 0, 						#"Size": 6824592
+    id => undef,			
+    parent => undef,		
+    created => undef,	
+    container => undef, 
+    container_config => {},
+    Size => 0, 		
     config => {},
     comment => undef,
     architecture => undef,
@@ -59,10 +59,12 @@ sub get{
 				$self->config(Eixo::Docker::Config->new(%h));
 			}
 
+			$self;
+
 		}
 	);
 
-	$self;
+	#$self;
 
 }
 
@@ -102,30 +104,54 @@ sub getAll{
 sub create{
 	my ($self, %args) = @_;
 
-	$args{fromImage} || $args{fromSrc} || $self->api->client->error_callback->(
 
-		'ImageCreate',
+	# actually, only fromImage it's supported
 
-		'PARAM_NEEDED',
-
-		'fromImage | fromSrc'
-
-	);
+	my $image = $args{fromImage};
 
 	$args{action} = 'create';
 
-	$args{GET_DATA} = { map { $_ => $args{$_} } qw(fromImage fromSrc) }; 
+	$args{__format} = 'RAW';
 
 	$self->api->postImages(
 
-	#	needed=>[qw(repo tag registry)],
+		needed=>[qw(fromImage)],
 
 		args=>\%args,
 
-		__callback=>$args{__callback}
+		get_params=>[qw(fromImage repo tag registry)],
+
+		__callback=>sub {
+
+			$self->get(id=>$image);
+
+			return $self;
+		}
 	);
 
 	#$self;
+}
+
+sub insertFile{
+	my ($self, %args) = @_;
+	
+	$args{action} = 'insert';
+
+	$self->api->postImages(
+
+		needed=>[qw(url path id)],
+
+		args=>\%args,
+
+		get_params=>[qw(url path)],
+
+		__callback=>sub {
+
+			$self;			
+
+		}
+
+	);
 }
 
 1;

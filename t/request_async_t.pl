@@ -36,7 +36,7 @@ my $request_async = Eixo::Rest::RequestAsync->new(
 		@_;
 	},
 
-	format=>'RAW'
+	__format=>'RAW'
 
 );
 

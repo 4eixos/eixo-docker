@@ -43,9 +43,9 @@ eval{
 
     );
 
-	my $image = $a->images->get(id => "busybox");
+	 my $image = $a->images->get(id => "busybox");
 	 ok(
-	 	ref $image eq "Eixo::Docker::Image" && $image->id =~ /^769b9341d937/, 
+	 	ref($image) eq "Eixo::Docker::Image", 
 	 	"Images::get returns the busybox docker image if exists"
 	 );
 

@@ -15,7 +15,7 @@ has (
 	onError => undef,
 	onStart => undef,
 	
-	format=>'json'
+	__format=>'json'
 
 );
 
@@ -30,11 +30,13 @@ sub start{
 sub end{
 	my ($self, $response) = @_;
 
+
 	&{$self->onSuccess}(
 	
 		$self->callback->($self->unmarshall($response)),
 
 	);
+
 }
 
 sub error{
@@ -62,7 +64,8 @@ sub unmarshall{
 
 	my $content = $response->content;
 
-	if($self->format eq 'json'){
+
+	if($self->__format eq 'json'){
 
 		return JSON->new->decode($content || '{}')
 	}

@@ -85,6 +85,9 @@ sub AUTOLOAD{
 		$args{'__client_send_method'} = '__send';
 	}
 
+	if(!$args{__format}){
+		$args{__format} = $self->format;
+	}
 
 	# set error_callback unless already established
 	unless(defined($args{PROCESS_DATA}->{onError})){
@@ -97,12 +100,9 @@ sub AUTOLOAD{
 	}
 
 	my $uri = $self->build_uri($entity, $id, $action);
-    #print("Sending request to $uri with query ".$uri->query."\n");
 
-	my $res = $self->$method($uri, %args);
-    #print("Response: $res\n");
+	$self->$method($uri, %args);
 
-	return $res;
 }
 
 sub DESTROY {}
@@ -211,7 +211,7 @@ sub __send{
 
 		%{$args{PROCESS_DATA}},
 
-		format=>$self->format	
+		__format=>$args{__format}
 
 	)->send(
 
@@ -236,8 +236,8 @@ sub __sendAsync{
 
 		%{$args{PROCESS_DATA}},
 
-		format=>$self->format	
-	
+		__format=>$args{__format}
+
 	)->send(
 
 		$self->ua($USER_AGENT_VERSION), 
