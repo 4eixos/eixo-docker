@@ -71,7 +71,7 @@ sub get{
 sub inspect{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->id if($self->id);
+	$args{id} = $self->id unless($args{id});
 	
 	$args{action} = 'json';
 	
@@ -87,6 +87,28 @@ sub inspect{
 
 	);
 
+}
+
+sub history{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->id unless($args{id});
+
+	$args{action} = 'history';
+
+	$self->api->getImages(
+
+		needed=>[qw(id)],
+
+		args=>\%args,
+
+		__callback=>sub {
+
+			print Dumper(\@_);
+
+		}
+
+	);
 }
 
 sub getAll{
