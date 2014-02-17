@@ -15,12 +15,16 @@ has (
 	onError => undef,
 	onStart => undef,
 	
-	__format=>'json'
+	__format=>'json',
+
+	buffer=>'',
 
 );
 
 sub start{
 	my ($self) = @_;
+
+	$self->{buffer} = ''; # truncate the buffer
 
 	if($self->onStart){
 		$self->onStart->();
@@ -33,7 +37,7 @@ sub end{
 
 	&{$self->onSuccess}(
 	
-		$self->callback->($self->unmarshall($response)),
+		$self->callback->($self->unmarshall($response), $self),
 
 	);
 
@@ -51,6 +55,8 @@ sub error{
 
 sub progress{
     my ($self, $chunk, $req) = @_;
+
+    $self->buffer($self->buffer . $chunk);
 
     $self->onProgress->($chunk, $req) if($self->onProgress);
 }   

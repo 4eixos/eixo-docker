@@ -99,7 +99,7 @@ sub AUTOLOAD{
 		};
 	}
 
-	my $uri = $self->build_uri($entity, $id, $action);
+	my $uri = $self->build_uri($entity, $id, $action, $args{__implicit_format});
 
 	$self->$method($uri, %args);
 
@@ -182,16 +182,20 @@ sub put :__log {
 
 
 sub build_uri {
-	my ($self, $entity, $id,$action) = @_;
+	my ($self, $entity, $id,$action, $implicit_format) = @_;
 
 	my $uri = $self->{endpoint}.'/'.$entity;
 	
 	$uri .= '/'.$id if(defined($id));
 	$uri .= '/'.$action if(defined($action));
 
-    ($self->current_method =~ /^get/)?
-        URI->new($uri.'/'.$self->{format}):
-        URI->new($uri);
+	return URI->new($uri) if($implicit_format);
+
+    	($self->current_method =~ /^get/)?
+
+        	URI->new($uri.'/'.$self->{format}) :
+
+        	URI->new($uri);
 }
 
 
