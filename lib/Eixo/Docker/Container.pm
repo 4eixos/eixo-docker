@@ -148,7 +148,7 @@ sub create {
                 #return container fully loaded
                 $self->get(id => $result->{Id});
 
-				$self;
+		$self;
             }
 	);
 
@@ -246,9 +246,17 @@ sub copy{
 	
 		post_params=>[qw(Resource)],
 
+		onProgress=>sub {
+
+			print " >>>" . join('', @_, "\n");
+
+		},
+
 		__callback=>sub {
 
-			return $_[0];
+			use Data::Dumper; print Dumper(\@_);
+
+			return $_[0] || $_[1]->buffer;
 
 		}
 	);

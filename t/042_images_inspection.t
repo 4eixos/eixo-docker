@@ -20,6 +20,8 @@ $a->flog(sub {
 
     my ($api_ref, $data, $args) = @_;
 
+    print Dumper(\@_);
+
     push @calls, $data->[1];
 
 });
@@ -36,7 +38,7 @@ eval{
 
      	);
     
-	$image->history();
+	print Dumper([$image->history()]);
 };
 if($@){
 	print Dumper($@);

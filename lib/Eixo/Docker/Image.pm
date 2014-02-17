@@ -19,7 +19,7 @@ has(
     architecture => undef,
     docker_version => undef,
     os => undef,
-
+    history=>[],
 );
 
 
@@ -96,6 +96,8 @@ sub history{
 
 	$args{action} = 'history';
 
+	$args{__implicit_format} = 1;
+
 	$self->api->getImages(
 
 		needed=>[qw(id)],
@@ -104,7 +106,13 @@ sub history{
 
 		__callback=>sub {
 
-			print Dumper(\@_);
+
+			map { 
+
+				print Dumper($_);
+				#Eixo::Docker::ImageResume->new(%{$_})
+
+			} @{$_[0]};
 
 		}
 
@@ -190,12 +198,22 @@ sub insertFile{
 
 		get_params=>[qw(url path)],
 
+	#	onProgress => sub {print "progress:".$_[0]."\n"},
+
+	#	onSuccess => sub {print "success:".$_[0]."\n"},
+
 		__callback=>sub {
+
+			use Data::Dumper; 
 
 			#
 			# Take the last id and use it to get the new image
 			#
-			$_[0] =~ /\"\id\"\:\"([^"]+)\"\}$/;
+			$_[0] =~ /\"\w+\"\:\"([^"]+)\"\}$/;
+
+			#die("Return value: ".$_[0].", grupo:$1");
+
+			print "$1 ||| \n\n";
 
 			$self->api->images->get(id=>substr($1, 0, 12));			
 		

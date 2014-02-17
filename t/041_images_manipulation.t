@@ -43,14 +43,13 @@ eval{
     
      	ok($image = $image->insertFile(
 
-		url=>'http://192.168.0.8:6884/test1',
+		url=>'http://0.0.0.0:6884/test1',
 		path=>'/tmp/test1',
 		id=>$image->id
 
       	), "Insert a file into image");
      		
 
-	
 
 	#
 	# Check if the file is correctly inserted in the image. 
@@ -76,9 +75,11 @@ eval{
 	#
 	# Copying the file
 	#
+	my $salida = $container->copy(Resource=>'/tmp/test1');
+
 	ok(
 
-		$container->copy(Resource=>'/tmp/test1') =~ /test1\,OK/,
+		$salida =~ /test1\,OK/,
 
 		'A new file has been inserted in the image'
 	);
@@ -106,7 +107,7 @@ if($container){
 }
 
 if($image){
-	$image->delete();
+	#$image->delete();
 }
 
 #
