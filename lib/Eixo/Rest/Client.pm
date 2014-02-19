@@ -108,7 +108,7 @@ sub AUTOLOAD{
 sub DESTROY {}
 
 
-sub get : __log {
+sub get : __logMe {
 
 	my ($self, $uri, %args) = @_;
 
@@ -121,7 +121,7 @@ sub get : __log {
     $self->$send_method($req, %args);
 }
 
-sub post : __log {
+sub post : __logMe {
 	my ($self,$uri,%args) = @_;
 
     # Is possible to add query string args to post requests
@@ -142,7 +142,7 @@ sub post : __log {
     $self->$send_method($req, %args);
 }
 
-sub delete : __log {
+sub delete : __logMe {
 
 	my ($self, $uri, %args) = @_;
 
@@ -155,7 +155,7 @@ sub delete : __log {
     $self->$send_method($req, %args);
 }
 
-sub patch :__log {
+sub patch :__logMe {
 	my ($self, $uri, %args) = @_;
 
 	$uri->query_form($args{GET_DATA});
@@ -168,7 +168,7 @@ sub patch :__log {
 
 }
 
-sub put :__log {
+sub put :__logMe {
 	my ($self, $uri, %args) = @_;
 
 	$uri->query_form($args{GET_DATA});
