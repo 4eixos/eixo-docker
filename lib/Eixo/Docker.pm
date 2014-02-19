@@ -1,10 +1,13 @@
 package Eixo::Docker;
 
-use 5.010;
+use 5.008;
 use strict;
 use warnings;
 
 use parent qw(Eixo::Base::Clase);
+use JSON;
+use LWP::UserAgent;
+use Eixo::Rest::Client;
 
 
 # Items to export into callers namespace by default. Note: do not export
