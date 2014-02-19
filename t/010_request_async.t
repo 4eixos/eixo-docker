@@ -1,13 +1,6 @@
-use strict;
-use warnings;
+use t::test_base;
 
-use Test::More;
-use Data::Dumper;
-use JSON;
-
-use lib './lib';
-
-use Eixo::Rest::RequestAsync;
+use_ok("Eixo::Rest::RequestAsync");
 
 #
 # We create a fake UserAgent and a fake Api
@@ -104,8 +97,7 @@ sub request{
 
 		$code->('CHUNK_' . $_, $self);		
 
-		sleep(1);
-
+        select(undef,undef,undef,0.25);
 	}
 
 	$self;

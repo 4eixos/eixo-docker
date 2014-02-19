@@ -1,93 +1,97 @@
-use strict;
-use warnings;
-
-use lib './lib';
-use Test::More;
-use Data::Dumper;
-use JSON;
 use t::test_base;
 
-use Eixo::Docker::Api;
+SKIP: {
 
-my @calls;
+    skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
+ 
+    eval{ require "HTTP::Server::Simple::CGI"};
+    skip "HTTP::Server::Simple::CGI not installed", 2 if($@);
 
-my $a = Eixo::Docker::Api->new("http://localhost:4243");
+    use_ok "Eixo::Docker::Api";
+    use_ok "Eixo::Docker::Image";
 
-#
-# Set a logger sub
-#
-$a->flog(sub {
-
-    my ($api_ref, $data, $args) = @_;
-
-    push @calls, $data->[1];
-
-});
-
-my @res;
-
-my ($pid, $container, $image);
-
-eval{
-
-	#
-	# We create a test server listening in the 6884 port
-	#
-    	$pid = &TestServer::start_server;
-
-    	$image = $a->images->create(
-
-        	fromImage=>'ubuntu',
-     	);
-
+    my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
     
-     	ok($image = $image->insertFile(
-
-		url=>'http://0.0.0.0:6884/test1',
-		path=>'/tmp/test1',
-		id=>$image->id
-
-      	), "Insert a file into image");
-     		
-
-
-	#
-	# Check if the file is correctly inserted in the image. 
-	#
-	
-	# Launching a container with the new image
-	$container = $a->containers->create(
-
-		Hostname => 'test',
-
-		Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
-
-		Image => $image->id,
-
-		Name => "testing_insert_file",
-	);
-
-	# starting it
-	&change_state($container, "up");
-
-	sleep(2);
-
-	#
-	# Copying the file
-	#
-	my $salida = $container->copy(Resource=>'/tmp/test1');
-
-	ok(
-
-		$salida =~ /test1\,OK/,
-
-		'A new file has been inserted in the image'
-	);
-
-};
-if($@){
-	print Dumper($@);
+    my @calls;
+ 
+    #
+    # Set a logger sub
+    #
+    $a->flog(sub {
+    
+        my ($api_ref, $data, $args) = @_;
+    
+        push @calls, $data->[1];
+    
+    });
+    
+    my @res;
+    
+    my ($pid, $container, $image);
+    
+    eval{
+    
+    	#
+    	# We create a test server listening in the 6884 port
+    	#
+        	$pid = &TestServer::start_server;
+    
+        	$image = $a->images->create(
+    
+            	fromImage=>'ubuntu',
+         	);
+    
+        
+         	ok($image = $image->insertFile(
+    
+    		url=>'http://0.0.0.0:6884/test1',
+    		path=>'/tmp/test1',
+    		id=>$image->id
+    
+          	), "Insert a file into image");
+         		
+    
+    
+    	#
+    	# Check if the file is correctly inserted in the image. 
+    	#
+    	
+    	# Launching a container with the new image
+    	$container = $a->containers->create(
+    
+    		Hostname => 'test',
+    
+    		Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
+    
+    		Image => $image->id,
+    
+    		Name => "testing_insert_file",
+    	);
+    
+    	# starting it
+    	&change_state($container, "up");
+    
+    	sleep(2);
+    
+    	#
+    	# Copying the file
+    	#
+    	my $salida = $container->copy(Resource=>'/tmp/test1');
+    
+    	ok(
+    
+    		$salida =~ /test1\,OK/,
+    
+    		'A new file has been inserted in the image'
+    	);
+    
+    };
+    if($@){
+    	print Dumper($@);
+    }
+    
 }
+
 
 done_testing();
 
@@ -107,15 +111,16 @@ if($container){
 }
 
 if($image){
-	#$image->delete();
+	$image->delete();
 }
+
 
 #
 # Test file server
 #
 package TestServer;
 
-use  parent qw(HTTP::Server::Simple::CGI);
+use parent -norequire, qw(HTTP::Server::Simple::CGI);
 
 sub start_server{
 	
@@ -138,6 +143,5 @@ sub handle_request{
 		print "test1,OK\n";
 	}
 }
-
 
 
