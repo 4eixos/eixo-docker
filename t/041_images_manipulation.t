@@ -4,7 +4,7 @@ SKIP: {
 
     skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
  
-    eval{ require "HTTP::Server::Simple::CGI"};
+    eval{ require "HTTP/Server/Simple/CGI.pm"};
     skip "HTTP::Server::Simple::CGI not installed", 2 if($@);
 
     use_ok "Eixo::Docker::Api";
@@ -71,7 +71,6 @@ SKIP: {
     	# starting it
     	&change_state($container, "up");
     
-    	sleep(2);
     
     	#
     	# Copying the file
@@ -84,6 +83,30 @@ SKIP: {
     
     		'A new file has been inserted in the image'
     	);
+
+
+        #
+        # Cleaning up
+        #
+
+        if($pid){
+            kill(9, $pid);
+        }
+
+        if($container){
+
+            &change_state($container, "down");
+
+            $container->delete();
+        }
+
+        if($image){
+            $image->delete();
+        }
+
+
+        done_testing();
+
     
     };
     if($@){
@@ -93,26 +116,7 @@ SKIP: {
 }
 
 
-done_testing();
 
-#
-# Cleaning up
-#
-
-if($pid){
-	kill(9, $pid);
-}
-
-if($container){
-
-	&change_state($container, "down");
-
-	$container->delete();
-}
-
-if($image){
-	$image->delete();
-}
 
 
 #

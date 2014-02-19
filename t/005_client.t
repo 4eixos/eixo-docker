@@ -1,9 +1,12 @@
 use t::test_base;
 
+BEGIN{
+    use_ok("Eixo::Rest::Client");
+}
+
 SKIP: {
     skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
     
-    use_ok("Eixo::Rest::Client");
 
     # set log function
     # Eixo::Docker::Base::stashSet("f_log", sub {print join("\n",@_)});
@@ -16,9 +19,7 @@ SKIP: {
     # Set a logger sub
     #
     $a->flog(sub {
-    
-    my ($api_ref, $data, $args) = @_;
-    
+        my ($api_ref, $data, $args) = @_;
     	push @calls, $data->[1];
     
     });
@@ -40,14 +41,14 @@ SKIP: {
         PROCESS_DATA => $process_data,
         __callback => $callback
     );
-    diag "Get all containers returns ". Dumper($h);
+    diag "Get all containers returns a containers list:";#. Dumper($h);
     
     ok(
     	ref $h eq "ARRAY", 
     	"Testing containers list command return an array"
     );
     
-    ok($calls[0] eq 'get', 'Method call has been logged');
+    ok($calls[0] eq 'get', 'Method call has been logged');#.Dumper(\@calls));
 }
 
 done_testing();

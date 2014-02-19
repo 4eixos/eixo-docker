@@ -22,7 +22,7 @@ SKIP: {
 
     my $lista;
     eval {
-        $a->containers->getAll();
+        $lista = $a->containers->getAll();
     };
     ok(!$@, "Testing containers#getAll");
 

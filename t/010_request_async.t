@@ -1,6 +1,8 @@
 use t::test_base;
 
-use_ok("Eixo::Rest::RequestAsync");
+BEGIN{
+	use_ok("Eixo::Rest::RequestAsync");
+}
 
 #
 # We create a fake UserAgent and a fake Api

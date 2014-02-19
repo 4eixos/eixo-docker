@@ -16,5 +16,8 @@ WriteMakefile(
           TEST_REQUIRES     => {
               "HTTP::Server::Simple::CGI" => 0
           },
+          BUILD_REQUIRES   => {
+              "HTTP::Server::Simple::CGI" => 0
+          },
       ): ()),
 );

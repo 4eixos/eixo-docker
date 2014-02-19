@@ -21,7 +21,6 @@ has(
 	ua=>undef,
 	endpoint=>undef,
 	format=>'json',
-	flog=>undef,
 	error_callback => undef,
 	current_method => undef,
 );
@@ -108,7 +107,7 @@ sub AUTOLOAD{
 sub DESTROY {}
 
 
-sub get : __logMe {
+sub get: Log {
 
 	my ($self, $uri, %args) = @_;
 
@@ -121,7 +120,7 @@ sub get : __logMe {
     $self->$send_method($req, %args);
 }
 
-sub post : __logMe {
+sub post: Log {
 	my ($self,$uri,%args) = @_;
 
     # Is possible to add query string args to post requests
@@ -142,7 +141,7 @@ sub post : __logMe {
     $self->$send_method($req, %args);
 }
 
-sub delete : __logMe {
+sub delete: Log {
 
 	my ($self, $uri, %args) = @_;
 
@@ -155,7 +154,7 @@ sub delete : __logMe {
     $self->$send_method($req, %args);
 }
 
-sub patch :__logMe {
+sub patch: Log {
 	my ($self, $uri, %args) = @_;
 
 	$uri->query_form($args{GET_DATA});
@@ -168,7 +167,7 @@ sub patch :__logMe {
 
 }
 
-sub put :__logMe {
+sub put: Log {
 	my ($self, $uri, %args) = @_;
 
 	$uri->query_form($args{GET_DATA});

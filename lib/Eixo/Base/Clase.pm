@@ -115,7 +115,7 @@ sub methods{
 #
 # logger installing code
 #
-sub __logMe : ATTR(CODE){
+sub Log :ATTR(CODE){
 
 	my ($pkg, $sym, $code, $attr_name, $data) = @_;
 
