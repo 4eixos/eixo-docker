@@ -10,6 +10,11 @@ WriteMakefile(
         'LWP::UserAgent' => "5.0" 
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT  => 'Perl module to interact with Docker API', 
-       AUTHOR         => '': ()),
+      (
+          ABSTRACT         => 'Perl module to interact with Docker API', 
+          AUTHOR           => '',
+          TEST_REQUIRES     => {
+              "HTTP::Server::Simple::CGI" => 0
+          },
+      ): ()),
 );
