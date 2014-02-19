@@ -262,6 +262,58 @@ sub copy{
 	);
 }
 
+sub attach{
+	my ($self, %args) = @_;
+
+	$args{__format} = 'RAW';
+
+	$self->__exec(
+
+		'attach',
+
+		args=>\%args,
+
+		get_params=>[qw(logs stream stdin stdout stderr)],
+
+		onProgress=>sub{
+
+			print "$_[0] \n";
+		},
+
+		__callback=>sub{
+
+			print "$_[0] \n";
+
+		}
+
+	);
+}
+
+sub top{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->ID unless($args{id});
+
+	$args{__implicit_format} = 1;
+	
+	$args{action} = 'top';
+
+	$self->api->getContainers(
+
+		args=>\%args,
+
+		get_params=>[qw(ps_args)],
+
+		__callback=>sub{
+
+			use Data::Dumper; print Dumper(\@_);
+
+		}
+		
+
+	);
+
+}
 
 sub __exec {
     my ($self, $action, %args) = @_;
