@@ -11,5 +11,5 @@ WriteMakefile(
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT  => 'Perl module to interact with Docker API', 
-       AUTHOR         => '': ()),
+       AUTHOR         => ''): ()),
 );
