@@ -8,6 +8,7 @@ use Eixo::Docker::Config;
 use Eixo::Docker::ContainerResume;
 use Eixo::Docker::ContainerException;
 use Eixo::Docker::HostConfig;
+use Eixo::Docker::RequestRawStream;
 
 my $DEFAULT_TIMEOUT = 30;
 
@@ -247,14 +248,11 @@ sub copy{
 		post_params=>[qw(Resource)],
 
 		onProgress=>sub {
-
-			print " >>>" . join('', @_, "\n");
-
 		},
 
 		__callback=>sub {
 
-			use Data::Dumper; print Dumper(\@_);
+			#use Data::Dumper; print Dumper(\@_);
 
 			return $_[0] || $_[1]->buffer;
 
@@ -265,28 +263,36 @@ sub copy{
 sub attach{
 	my ($self, %args) = @_;
 
-	$args{__format} = 'RAW';
+	$args{id} = $self->ID unless($args{id});
 
-	$self->__exec(
+	$args{action} = 'attach';
+	
+	$args{$_} = $args{$_} || 0 foreach(qw(logs stream stdin stdout stderr));
 
-		'attach',
+	Eixo::Docker::RequestRawStream->new(
+
+		entity=>'containers',
+
+		id=>$args{id},
+
+		action=>'attach',
+
+		method=>'POST',
+
+		host=>$self->api->client->endpoint,
 
 		args=>\%args,
 
-		get_params=>[qw(logs stream stdin stdout stderr)],
+		url_args=>[qw(logs stream stdin stdout stderr)],
 
-		onProgress=>sub{
+		f_line=>sub {
 
-			print "$_[0] \n";
-		},
-
-		__callback=>sub{
-
-			print "$_[0] \n";
+			print ">$_[0]\n";
 
 		}
 
-	);
+	)->process();#$self->Config->Tty);
+
 }
 
 sub top{
