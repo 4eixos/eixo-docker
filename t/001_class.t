@@ -1,8 +1,9 @@
 package AA;
+use t::test_base;
 
-use lib './lib';
+BEGIN{use_ok("Eixo::Base::Clase")}
 
-use Eixo::Base::Clase;
+
 use parent qw(Eixo::Base::Clase);
 
 has (
