@@ -81,7 +81,7 @@ if($container){
 
 	&change_state($container, 'down');
 
-	$container->delete;
+    #$container->delete;
 }
 
 done_testing();

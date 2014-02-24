@@ -12,6 +12,10 @@ use IO::Select;
 
 use threads;
 use Thread::Queue;
+use IO::Handle;
+use Eixo::Docker::Job;
+
+my $JOB_ID = 0;
 
 has(
 
@@ -43,7 +47,11 @@ has(
 
 	f_end=>undef,
 
-	queue=>undef
+	queue_in=>undef,
+
+	queue_out=>undef,
+
+	jobs => [],
 );
 
 
@@ -53,24 +61,66 @@ sub process{
 	#
 	# We create a queue to handle communication
 	#
-	my $queue = Thread::Queue->new;
+	$self->queue_in(Thread::Queue->new);
+	$self->queue_out(Thread::Queue->new);
 
 	threads->new(sub {
-		my ($self, $multiplexed, $queue) = @_;
+		my ($self, $multiplexed) = @_;
 
-		$self->queue($queue);
-		
 		$self->_process($multiplexed);
 
-	}, $self, $multiplexed, $queue)->detach;
+	}, $self, $multiplexed)->detach;
 
 	#
 	# We encapsulate a callback to send commands
 	#
+	(sub {
+
+		$self->queue_in->enqueue([++$JOB_ID, $_[0]]);
+
+		push @{$self->jobs}, Eixo::Docker::Job->new(
+		
+			id => $JOB_ID,
+			params => $_[0],
+			status => 'SEND',
+		);
+
+		$JOB_ID;
+	},
 	sub {
-		$queue->enqueue($_[0]);
-	}
+		$self->wait_for_job($_[0])
+	})
 }
+
+
+sub wait_for_job{
+	my ($self, $job_id) = @_;
+
+    while(grep {$_->{status} ne 'END'} @{$self->jobs}){
+
+        if(my $res = $self->queue_out->dequeue_nb){
+
+            my $j = $self->getJob($res->[0]);
+            $j->{results} = $res->[1];
+            $j->{status} = 'END';
+            #print "Algo cheogou!!".Dumper($self->{jobs});use Data::Dumper;
+
+            # if we found the job searched return with results
+            return $j->results if($j->id eq $job_id);
+        }   
+
+        select(undef,undef,undef,0.25);
+    }   
+
+}
+
+sub getJob {
+	my ($self, $job_id) = @_;
+
+	(grep {$_->id eq $job_id} @{$self->jobs})[0];
+
+}
+
 
 sub _process{
 	my ($self, $multiplexed) = @_;
@@ -112,17 +162,22 @@ sub _block{
 
 	$select->add($socket);
 
+	my $job_id = undef;
+
 	while(1){
 
 		my @ready = $select->can_read(0.25);
 			
 		if(@ready > 0){
 
-			last unless($self->f_process->($ready[0]));
+			last unless($self->f_process->($job_id, $ready[0]));
 		}
 		
-		if(my $cmd = $self->queue->dequeue_nb){
-			$self->_sendCmd($cmd, $socket);
+		if(my $job = $self->queue_in->dequeue_nb){
+			
+			$job_id = $job->[0];
+
+			$self->_sendCmd($job->[1], $socket);
 		}
 	}
 }
@@ -134,7 +189,9 @@ sub _stream{
 
 	$self->f_process(sub {
 
-		my $socket = $_[0];
+		my $job_id = $_[0];
+
+		my $socket = $_[1];
 
 		my $ok = undef;
 
@@ -167,8 +224,9 @@ sub _stream{
 		}
 
 		if($data =~ /\n/){
-
 			$self->__send('LINE', $_) foreach(split(/\n/, $data));
+
+			$self->queue_out->enqueue([$job_id,$data]);
 
 			$data = '';
 		}
@@ -207,8 +265,6 @@ sub __buildUri{
 
 sub __send{
 	my ($self, $type, $data, $destiny) = @_;
-
-	print "$data\n";
 
 	$destiny = $destiny || $self->f_line;
 
