@@ -1,35 +1,47 @@
-use test_base;
+use t::test_base;
 
 use Eixo::Docker::Api;
 
 my $a = Eixo::Docker::Api->new("http://localhost:4243");
 
 eval {
+
     my $c = $a->containers->getByName('testing_1233_');
     
     &change_state($c, 'up');
+
     
+   
     my ($fcmd, $fout) = $c->attach(
     
         stdout=>1,
         stderr =>1,
         stdin=>1,
         stream=>1,
+
+	#f_line=>sub {
+	#	print "$_\n" foreach(@_);
+	#}
     );
 
     my @ids;
 
-    while( my $cmd = <STDIN> ){
-        print "enviando $cmd",
-        chomp($cmd);
-        last if($cmd eq 'exit');
+    my $cmd = <STDIN>;
+    chomp($cmd);
+    $fcmd->($cmd);
 
-        push @ids,$fcmd->($cmd);
-    }
+    #while( my $cmd = <STDIN> ){
+    #    print "enviando $cmd",
+    #    chomp($cmd);
+    #    last if($cmd eq 'exit');
 
-    foreach(@ids){
-        print $fout->($_);
-    }
+    #    push @ids,$fcmd->($cmd);
+    #}
+ 
+    <STDIN>;
+   # foreach(@ids){
+   #     print $fout->($_);
+   # }
 
 
     

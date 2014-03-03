@@ -87,6 +87,7 @@ sub process{
 
 		$JOB_ID;
 	},
+
 	sub {
 		$self->wait_for_job($_[0])
 	})
@@ -145,6 +146,8 @@ sub _process{
 	$socket->read_response_headers;
 
 	$self->_block($socket);
+
+	threads->exit();
 }
 
 sub _block{
@@ -173,7 +176,7 @@ sub _block{
 			last unless($self->f_process->($job_id, $ready[0]));
 		}
 		
-		if(my $job = $self->queue_in->dequeue_nb){
+		while(my $job = $self->queue_in->dequeue_nb){
 			
 			$job_id = $job->[0];
 

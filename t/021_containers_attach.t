@@ -1,5 +1,6 @@
 use t::test_base;
 
+use Test::More;
 use Eixo::Docker::Api;
 
 my $a = Eixo::Docker::Api->new("http://localhost:4243");
@@ -13,9 +14,10 @@ $a->client->flog(sub {
 
 });
 
-my ($container);
+my ($container, $name);
 
 eval{
+
 	$a->images->create(fromImage=>'ubuntu');
 	
 	#
@@ -26,7 +28,7 @@ eval{
 		Hostname => 'test',
 		Cmd => ['/bin/bash'],
 		Image => "ubuntu",
-		Name => "testing_1233_",
+		Name => $name = "testing_1233_" . int(rand(9999)),
 		Tty=>"false",
 
 		"AttachStdin"=>"true",

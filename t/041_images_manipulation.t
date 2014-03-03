@@ -105,7 +105,6 @@ SKIP: {
         }
 
 
-        done_testing();
 
     
     };
@@ -115,8 +114,7 @@ SKIP: {
     
 }
 
-
-
+done_testing();
 
 
 #

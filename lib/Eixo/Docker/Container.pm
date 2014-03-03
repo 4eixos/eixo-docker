@@ -285,7 +285,7 @@ sub attach{
 
 		url_args=>[qw(logs stream stdin stdout stderr)],
 
-		f_line=>sub {
+		f_line=>$args{f_line} || sub {
 
 			#print ">$_[0]\n";
 
