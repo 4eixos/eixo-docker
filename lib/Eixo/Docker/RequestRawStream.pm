@@ -153,7 +153,7 @@ sub _process{
 sub _block{
 	my ($self, $socket) = @_;
 
-	my $flags = '';
+	my $flags = 0;
 
 	fcntl($socket, F_GETFL, $flags)  or die "get : $!\n";
 
@@ -188,7 +188,7 @@ sub _block{
 sub _stream{
 	my ($self) = @_;
 
-	my $data;
+	my $data = '';
 
 	$self->f_process(sub {
 
