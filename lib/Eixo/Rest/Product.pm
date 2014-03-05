@@ -44,6 +44,8 @@ sub AUTOLOAD{
 	# }
 }
 
+sub DESTROY{}
+
 sub populate{
 	my ($self, $values) = @_;
 
