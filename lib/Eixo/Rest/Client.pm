@@ -128,11 +128,25 @@ sub post: Log {
 
     my $req = HTTP::Request->new(POST => $uri);
 
-    $req->header('content-type' => 'application/json');
+    #$req->header('content-type' => 'application/json');
 
-    my $content = JSON->new->allow_blessed(1)
+    my $headers = $args{HEADER_DATA} || {'Content-Type' => 'application/json'};
+
+    $req->header(%$headers);
+
+    my $content;
+
+    if($req->header("Content-Type") eq "application/json"){
+
+        $content = JSON->new->allow_blessed(1)
                             ->convert_blessed(1)
                             ->encode($args{POST_DATA} || {});
+    }
+    else{
+        
+        # raw stream
+        $content = $args{POST_DATA};
+    }
 
     $req->content($content);
 
