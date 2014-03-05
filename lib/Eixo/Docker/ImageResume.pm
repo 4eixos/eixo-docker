@@ -9,6 +9,7 @@ has(
     RepoTags => [],
     Id => undef,
     Created=>undef,
+    CreatedBy => undef,
     Size=>undef,
     VirtualSize=>undef,
     ParentId=>undef,
