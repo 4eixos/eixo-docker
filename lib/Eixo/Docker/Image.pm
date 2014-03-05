@@ -6,6 +6,7 @@ use parent qw(Eixo::Rest::Product);
 
 use Eixo::Docker::Config;
 use Eixo::Docker::ImageResume;
+use Archive::Tar;
 
 has(
     id => undef,			
@@ -109,8 +110,8 @@ sub history{
 
 			map { 
 
-				print Dumper($_);
-				#Eixo::Docker::ImageResume->new(%{$_})
+            #print Dumper($_);
+				Eixo::Docker::ImageResume->new(%{$_})
 
 			} @{$_[0]};
 
@@ -182,6 +183,67 @@ sub create{
 
 	#$self;
 }
+
+sub build {
+
+    my ($self, %args) = @_;
+
+    my $image_name =  $args{t} || $args{tag} || die("Lacks 'tag' param");
+
+    my $get_data = { 
+        t => $image_name
+    };
+
+    $get_data->{q} = $args{q} || $args{quiet} if(defined($args{q}||$args{quiet}));
+    $get_data->{nocache} = $args{nocache} if(defined($args{nocache}));
+
+    delete($args{$_}) foreach (qw(q quiet tag t nocache));
+
+
+    # remaining args must be string-files to use in build
+    # Dockerfile is a must
+    die("Dockerfile arg doesn't exists") unless(defined($args{Dockerfile}));
+
+    my $tar = Archive::Tar->new;
+    while(my ($name, $data) = each (%args)){
+        $tar->add_data($name, $data);
+    }
+
+    my $params = {
+        
+        GET_DATA => $get_data,
+        POST_DATA => $tar->write(),
+        HEADER_DATA => {"Content-Type", "application/tar"},
+        __format => "RAW"
+    };
+
+
+    $self->api->postBuild(
+        
+        args => $params,
+
+		__callback=>sub {
+
+			$self->get(id=>$image_name);
+
+			return $self;
+		}
+    );
+
+
+}
+
+
+sub build_from_dir{
+    
+    my ($self, %args) = @_;
+}
+
+
+sub import{
+
+}
+
 
 sub insertFile{
 	my ($self, %args) = @_;
