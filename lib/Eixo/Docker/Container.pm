@@ -287,8 +287,7 @@ sub attach{
 
 		f_line=>$args{f_line} || sub {
 
-			#print ">$_[0]\n";
-
+            (wantarray)? @_ : $_[0];
 		}
 
 	)->process();#$self->Config->Tty);

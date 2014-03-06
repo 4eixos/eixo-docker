@@ -99,16 +99,18 @@ sub wait_for_job{
 
     while(grep {$_->{status} ne 'END'} @{$self->jobs}){
 
-        if(my $res = $self->queue_out->dequeue_nb){
+        if(defined(my $res = $self->queue_out->dequeue_nb)){
 
             my $j = $self->getJob($res->[0]);
             $j->{results} = $res->[1];
             $j->{status} = 'END';
-            #print "Algo cheogou!!".Dumper($self->{jobs});use Data::Dumper;
+            print "Recibimos:".Dumper($res);use Data::Dumper;
 
             # if we found the job searched return with results
             return $j->results if($j->id eq $job_id);
-        }   
+        }
+
+        print "En wait_for_job\n";#.Dumper($self->jobs)."\n";
 
         select(undef,undef,undef,0.25);
     }   
@@ -153,7 +155,7 @@ sub _process{
 sub _block{
 	my ($self, $socket) = @_;
 
-	my $flags = 0;
+	my $flags;
 
 	fcntl($socket, F_GETFL, $flags)  or die "get : $!\n";
 
@@ -169,14 +171,19 @@ sub _block{
 
 	while(1){
 
+
+        # TODO:
+        # funciona ben mentres haxa salida (ou eco =>  Tty = true)
+        # se non hai saida (pq esta redirixida p.ex) hai que buscar outra forma
 		my @ready = $select->can_read(0.25);
+        #####
 			
 		if(@ready > 0){
 
 			last unless($self->f_process->($job_id, $ready[0]));
 		}
 		
-		while(my $job = $self->queue_in->dequeue_nb){
+		if(my $job = $self->queue_in->dequeue_nb){
 			
 			$job_id = $job->[0];
 
@@ -189,7 +196,7 @@ sub _stream{
 	my ($self) = @_;
 
 	my $data = '';
-
+ 
 	$self->f_process(sub {
 
 		my $job_id = $_[0];
@@ -200,11 +207,13 @@ sub _stream{
 
 		my $n = 0;
 
-		my $buf;
+		my $buf = '';
 
 		while(!$ok){
 
+            print "JOB: $job_id, Tratando de ler do socket\n";
 			$n = $socket->sysread($buf, 1024);
+            print "JOB: $job_id, Lemos $n bytes do socket: '$buf'\n";
 
 			if(!defined($n)){
 

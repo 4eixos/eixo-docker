@@ -15,7 +15,7 @@ SKIP: {
     
     });
     
-    my ($container, $name);
+    my ($container, $name, @jobs);
     
     eval{
     
@@ -33,8 +33,8 @@ SKIP: {
     		Tty=>"false",
     
     		"AttachStdin"=>"true",
-         		"AttachStdout"=>"true",
-         		"AttachStderr"=>"true",
+            "AttachStdout"=>"true",
+            "AttachStderr"=>"true",
     		"OpenStdin" => "true",
     	);
     
@@ -42,38 +42,43 @@ SKIP: {
     	# Run it
     	#
     	&change_state($container, 'up');
-    	
-    	sleep(1);
-    
-    	#
+
     	# Attach to it
     	#
-    	my $fcmd = $container->attach(
+    	my ($fcmd,$fout) = $container->attach(
     
     		stdout=>1,
     		stdin=>1,
     		stream=>1,
+            f_line => sub {
+                print $_[0];
+            },
     	);
     
     	#
     	# Create a couple of files
     	# 
-    	$fcmd->('/bin/echo "TEST1" > /tmp/test');	
+        #push @jobs, $fcmd->('/bin/echo "TEST1" && find / && sleep 10');
+        #push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
+        push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
     
-    	$fcmd->('/bin/echo "TEST2" > /tmp/test2');	
+    	push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
+
+        # esperamos a que finalicen os jobs enviados
+        $fout->();
     
-    	sleep(1);
     	#
     	# Retrieve them
     	#
+        #print Dumper($container->copy(Resource => "/tmp/test"));
     	ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
-    
-    	ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created(2)');
+        
+        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
     
     	#
     	# We stop the container	
     	#
-    	$fcmd->('exit');
+        $fcmd->('exit');
     };
     
     if($@){
@@ -82,9 +87,9 @@ SKIP: {
     
     if($container){
     
-    	&change_state($container, 'down');
+        &change_state($container, 'down');
     
-        #$container->delete;
+        $container->delete;
     }
 
 }
