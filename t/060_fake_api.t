@@ -2,9 +2,8 @@ use t::test_base;
 
 SKIP: {
 
-    skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
- 
     eval{ require "HTTP/Server/Simple/CGI.pm"};
+
     skip "HTTP::Server::Simple::CGI not installed", 2 if($@);
 
     use_ok(Eixo::Rest::ApiFakeServer);

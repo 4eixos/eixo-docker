@@ -7,7 +7,7 @@ SKIP: {
     use_ok "Eixo::Docker::Image";
 
 
-    my $TEST_IMAGE_NAME = 'testing_image123';
+    my $TEST_IMAGE_NAME = 'testing_image123_' . int(rand(1000));
 
     my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
 
@@ -19,6 +19,9 @@ SKIP: {
     ok($i && ref($i) eq "Eixo::Docker::Image", "Image build from Dockerfile");
 
     my @hitos = map {$_->CreatedBy} $i->history;
+
+    #print Dumper($i->history);
+
     ok(
         (grep {/MAINTAINER test/} @hitos), 
         "MAINTAINER command applied correctly"
