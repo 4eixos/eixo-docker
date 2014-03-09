@@ -2,6 +2,8 @@ use t::test_base;
 
 use Eixo::Docker::Api;
 
+use_ok("Eixo::Docker::RequestRawStream");
+
 SKIP: {
     skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
 
@@ -19,7 +21,7 @@ SKIP: {
     
     eval{
     
-    	$a->images->create(fromImage=>'ubuntu');
+        #$a->images->create(fromImage=>'ubuntu');
     	
     	#
     	# Create a container
@@ -50,9 +52,9 @@ SKIP: {
     		stdout=>1,
     		stdin=>1,
     		stream=>1,
-            f_line => sub {
-                print $_[0];
-            },
+            #f_line => sub {
+            #    print $_[0];
+            #},
     	);
     
     	#
@@ -60,9 +62,12 @@ SKIP: {
     	# 
         #push @jobs, $fcmd->('/bin/echo "TEST1" && find / && sleep 10');
         #push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
-        push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
+
+        #push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
+        push @jobs, $fcmd->('/bin/echo "TEST1"');
+    	push @jobs, $fcmd->('/bin/echo "TEST2"');
     
-    	push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
+        #push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
 
         # esperamos a que finalicen os jobs enviados
         $fout->();
@@ -71,14 +76,21 @@ SKIP: {
     	# Retrieve them
     	#
         #print Dumper($container->copy(Resource => "/tmp/test"));
-    	ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
+        #ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
         
-        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
-    
+        #ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
+
+        my $jid = $fcmd->("find /usr");
+        my $res = $fout->($jid);
+        print "resposta:".length($res);
+        open F, '>', '/tmp/aa';
+        print F $res;
+        close F;
     	#
     	# We stop the container	
     	#
-        $fcmd->('exit');
+        #$fcmd->('exit');
+        #$fout->();
     };
     
     if($@){
@@ -87,9 +99,9 @@ SKIP: {
     
     if($container){
     
-        &change_state($container, 'down');
+        #&change_state($container, 'down');
     
-        $container->delete;
+        #$container->delete;
     }
 
 }

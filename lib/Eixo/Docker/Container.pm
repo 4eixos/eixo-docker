@@ -269,28 +269,41 @@ sub attach{
 	
 	$args{$_} = $args{$_} || 0 foreach(qw(logs stream stdin stdout stderr));
 
-	Eixo::Docker::RequestRawStream->new(
+    if($args{logs}){
 
-		entity=>'containers',
+        # if only wants log produced in container's stdout|stderr 
+    
+    }
+    else{
+        # we want a stream 
 
-		id=>$args{id},
+        # with terminal emulation (stdin & stdout)
+        
+        # with only messages produced in stdout|stderr
 
-		action=>'attach',
+	    Eixo::Docker::RequestRawStream->new(
 
-		method=>'POST',
+	    	entity=>'containers',
 
-		host=>$self->api->client->endpoint,
+	    	id=>$args{id},
 
-		args=>\%args,
+	    	action=>'attach',
 
-		url_args=>[qw(logs stream stdin stdout stderr)],
+	    	method=>'POST',
 
-		f_line=>$args{f_line} || sub {
+	    	host=>$self->api->client->endpoint,
 
-            (wantarray)? @_ : $_[0];
-		}
+	    	args=>\%args,
 
-	)->process();#$self->Config->Tty);
+	    	url_args=>[qw(logs stream stdin stdout stderr)],
+
+	    	f_line=>$args{f_line} || sub {
+
+                (wantarray)? @_ : $_[0];
+	    	}
+
+	    )->process();
+    }
 
 }
 
