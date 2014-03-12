@@ -7,7 +7,8 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Eixo/Docker.pm', # finds $VERSION
     PREREQ_PM         => {
         'JSON' => "2.50",
-        'LWP::UserAgent' => "5.0" 
+        'LWP::UserAgent' => "5.0",
+        'Net::HTTP'   => '6.06',
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (
