@@ -297,10 +297,11 @@ sub attach{
 
 	    	url_args=>[qw(logs stream stdin stdout stderr)],
 
-	    	f_line=>$args{f_line} || sub {
+	    	f_line=>$args{f_line} || $Eixo::Docker::IDENTITY_FUNC,
 
-                (wantarray)? @_ : $_[0];
-	    	}
+            f_process => $args{f_process} || $Eixo::Docker::IDENTITY_FUNC,
+
+            timeout => $args{timeout} || 60,
 
 	    )->process();
     # }

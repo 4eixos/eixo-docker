@@ -53,6 +53,7 @@ SKIP: {
     		stdout=>1,
     		stdin=>1,
     		stream=>1,
+            timeout => 1,
             #f_line => sub {
             #    print $_[0];
             #},
@@ -80,6 +81,7 @@ SKIP: {
 
         my $jid = $fcmd->("find /usr");
         my $res = $fout->($jid);
+        print "resposta longa: ".length($res)."\n";
         ok(length($res) > 1000000, "Test to receive a long string");
     	#
     	# We stop the container	

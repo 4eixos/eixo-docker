@@ -16,7 +16,11 @@ use Eixo::Rest::Client;
 
 our $VERSION = '0.01';
 
+our $IDENTITY_FUNC = sub {
 
+    (wantarray)? @_ : $_[0];
+
+};
 
 
 

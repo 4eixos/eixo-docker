@@ -40,20 +40,24 @@ SKIP: {
         );
 
         $container_config{Cmd} = ['perl','-e','
+use IO::Handle;
+autoflush STDOUT 1;
+
 my($i,$j) = (0,0); 
 while(1){
 
-
-    select(undef,undef,undef,0.05);
-
+    #select(undef,undef,undef,0.05);
     print "Sent cmd ".$i++." by STDOUT\n";
 
     print STDERR "Send cmd ".$j++." by STDERR\n";
+    sleep(1);
 }'
 ];
-        $container_config{Name} = "testing_1233_".int(rand(9999));
+        $container_config{Name} = "testing";
 
-    	$container = $a->containers->create(%container_config);
+        my $container = $a->containers->getByName("testing") || 
+            $a->containers->create(%container_config);
+
     	&change_state($container, 'up');
 
         sleep(5);
@@ -64,12 +68,12 @@ while(1){
     		stdout=>1,
             stderr => 1,
     		stdin=>0,
-    		stream=>0,
-            logs => 1,
-            f_line => sub {print "mi f_line: ".$_[0]},
+    		stream=>1,
+            logs => 0,
+            f_process => sub {print "mi f_line: ".$_[0]},
         );
 
-        $fcmd->();
+        print "LOGS: ".$fcmd->();
     };
     if($container){
         print "limpiando\n";
