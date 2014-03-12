@@ -269,12 +269,12 @@ sub attach{
 	
 	$args{$_} = $args{$_} || 0 foreach(qw(logs stream stdin stdout stderr));
 
-    if($args{logs}){
+    # if($args{logs}){
 
-        # if only wants log produced in container's stdout|stderr 
+    #     # if only wants log produced in container's stdout|stderr 
     
-    }
-    else{
+    # }
+    # else{
         # we want a stream 
 
         # with terminal emulation (stdin & stdout)
@@ -303,7 +303,7 @@ sub attach{
 	    	}
 
 	    )->process();
-    }
+    # }
 
 }
 

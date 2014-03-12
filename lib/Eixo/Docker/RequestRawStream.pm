@@ -37,7 +37,7 @@ has(
 
 	f_process=>undef,
 
-	f_line=>undef,
+	f_line=> sub {print $_[0]},
 
 	f_stdin=>undef,
 
@@ -55,7 +55,7 @@ has(
 
     line_termination => "\n",
 
-    timeout => 5,
+    timeout => 60,
 );
 
 
@@ -108,7 +108,13 @@ sub process{
         
         # callback to take messages from container
         sub {
-            $self->queue_out->dequeue()->[1];
+           while(defined(my $res = $self->queue_out->dequeue())){
+                
+                # in perl 5.18 there is a q->end
+                last if($res eq "END");
+
+                $self->f_line->($res->[1]);
+           }
         }
     }
 }
@@ -169,18 +175,88 @@ sub _process{
 
 	$socket->write_request($self->method => $uri);
 	
-	if($multiplexed){
-		$self->_multiplexedStream($socket);
-	}
-	else{
-		$self->_stream($socket);
-	}
+	# if($multiplexed){
+	# 	$self->_multiplexedStream($socket);
+	# }
+	# else{
+	# 	$self->_stream($socket);
+	# }
 
-	$socket->read_response_headers;
+	my($code, $mess, %h) = $socket->read_response_headers;
 
-	$self->_block($socket);
+    # check response headers
+    confess("Error in http request: $mess (code = $code)") unless($code == 200);
+
+
+    print "headers:".Dumper(\%h);
+
+
+    if($self->args->{stream}){
+	   
+       $self->_block($socket);
+
+    }
+    else{
+
+        $self->_process_request_body($socket);
+    }
 
 	threads->exit();
+}
+
+
+sub _process_request_body{
+    my ($self, $socket) = @_;
+
+    my $data = '';
+    my $buf = '';
+
+
+    while (1) {
+
+        $buf = '';
+
+        # my $n = $socket->read_entity_body($buf, 1024);
+        my $n = $socket->sysread($buf, 1024);
+
+        print "leemos $n bytes do body\n";
+
+        if($n >= 8){
+
+            my $line_termination = $self->line_termination;
+
+            if($buf =~ /$line_termination/){
+
+                foreach my $line (split($line_termination,$buf)){
+
+                    my($stream_type,$length,$rest) = unpack('BxxxNA*', $line);
+                    print "tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
+                    $data .= $rest.$line_termination;
+                }
+            }
+            else{
+                my($stream_type,$length,$rest) = unpack('BxxxNA*', $buf);
+                print "NON HAI FIN DE LINEA:tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
+                $data .= $rest;
+
+            }
+        }
+        
+
+        if(!defined($n)){
+
+            if($! != EAGAIN || $! != EINTR){
+
+                die("Read failed: $!");
+            }
+        }
+
+        last unless($n > 0);
+
+    }
+
+    $self->queue_out->enqueue([0,$data]);
+    $self->queue_out->enqueue("END");
 }
 
 
@@ -221,6 +297,7 @@ sub _block{
             # if no response from socket in time, enqueue a empty string response
             # and jump to next job
             unless(@ready){
+                print "Timeout superado\n";
                 $self->queue_out->enqueue([$job_id,""]);
                 next;
             }
@@ -240,6 +317,8 @@ sub _block{
 
 }
 
+
+
 sub process_socket_stream{
 
     my ($self,$select) = @_;
@@ -255,8 +334,11 @@ sub process_socket_stream{
         
             $socket->sysread($buf, $size);
 
+            print "pillamos buffer con '$buf', queda $size\n";
+
             $data .= $buf;
             $size -= length($buf);
+            select(undef,undef,undef,0.25);
         
         }
 
@@ -267,10 +349,12 @@ sub process_socket_stream{
     # socket stream may be chunked
     my $data = '';
     while(my @ready = $select->can_read(0.25)){
+        print "hay algo no socket\n";
         my $socket = $ready[0];
 
+        print "vamos a leer a cabeceira\n";
         my $header = recvall($socket, $STREAM_HEADER_SIZE_BYTES);
-    
+        print "leendo a cabeceira: $header\n";
         return unless($header);
     
         my($stream_type, $length) = unpack('BxxxL>', $header);
@@ -283,6 +367,8 @@ sub process_socket_stream{
     
         return unless(defined($data));
     }
+
+    print "leemos $data\n";
 
     $data;
 

@@ -21,13 +21,12 @@ SKIP: {
     
     eval{
     
-        #$a->images->create(fromImage=>'ubuntu');
+        $a->images->create(fromImage=>'ubuntu');
     	
     	#
-    	# Create a container
+    	# Create a bash container
     	#
-    	$container = $a->containers->create(
-    
+        my %container_config = (
     		Hostname => 'test',
     		Cmd => ['/bin/bash'],
     		Image => "ubuntu",
@@ -38,12 +37,14 @@ SKIP: {
             "AttachStdout"=>"true",
             "AttachStderr"=>"true",
     		"OpenStdin" => "true",
-    	);
-    
+        );
+
+        $container = $a->containers->create(%container_config);
+
     	#
     	# Run it
     	#
-    	&change_state($container, 'up');
+        &change_state($container, 'up');
 
     	# Attach to it
     	#
@@ -61,14 +62,12 @@ SKIP: {
     	# Create a couple of files
     	# 
         #push @jobs, $fcmd->('/bin/echo "TEST1" && find / && sleep 10');
-        #push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
 
-        #push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
+        push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
+        push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
         push @jobs, $fcmd->('/bin/echo "TEST1"');
     	push @jobs, $fcmd->('/bin/echo "TEST2"');
     
-        #push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
-
         # esperamos a que finalicen os jobs enviados
         $fout->();
     
@@ -76,32 +75,29 @@ SKIP: {
     	# Retrieve them
     	#
         #print Dumper($container->copy(Resource => "/tmp/test"));
-        #ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
-        
-        #ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
+        ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
+        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
 
         my $jid = $fcmd->("find /usr");
         my $res = $fout->($jid);
-        print "resposta:".length($res);
-        open F, '>', '/tmp/aa';
-        print F $res;
-        close F;
+        ok(length($res) > 1000000, "Test to receive a long string");
     	#
     	# We stop the container	
     	#
-        #$fcmd->('exit');
-        #$fout->();
-    };
+        $fcmd->('exit');
+        $fout->();
     
+
+    };
     if($@){
     	print Dumper($@);
     }
-    
+
     if($container){
-    
-        #&change_state($container, 'down');
-    
-        #$container->delete;
+        
+        &change_state($container, 'down');
+        
+        $container->delete;
     }
 
 }
