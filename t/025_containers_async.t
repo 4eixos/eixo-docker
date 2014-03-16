@@ -80,7 +80,7 @@ SKIP: {
     	Hostname => 'test',
     	Memory => $memory,
     	Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
-    	Image => "base",
+    	Image => "ubuntu",
     	Name => "testing123",
     );
     
