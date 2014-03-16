@@ -18,7 +18,7 @@ has(
 
 sub initialize{
 
-	print $_[0]->container;
+	# print $_[0]->container;
 
 	#
 	# Attach a client thread to the system

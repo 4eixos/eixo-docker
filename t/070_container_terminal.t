@@ -1,83 +1,87 @@
 use t::test_base;
 
-use Eixo::Docker::Api;
+SKIP: {
+    skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
 
-use Eixo::Docker::Terminal;
+    use Eixo::Docker::Api;
 
-my ($name, $c);
+    use_ok(Eixo::Docker::Terminal);
 
-eval{
+    my ($name, $c);
 
-    	my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
+    eval{
 
-	$@ = undef;
+        my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
 
-	my $memory = 128*1024*1024; #128MB
-	
-	my %h = (
-	
-		Name => $name = "testing_" . int(rand(1000)),
+    	$@ = undef;
 
-		Memory=>$memory,
+    	my $memory = 128*1024*1024; #128MB
+    	
+    	my %h = (
+    	
+    		Name => $name = "testing_" . int(rand(1000)),
 
-    		Cmd => ['/bin/bash'],
+    		Memory=>$memory,
 
-    		Image => "base",
+        	Cmd => ['/bin/bash'],
 
-    		Tty=>"false",
-    
-		"AttachStdin"=>"true",
-		"AttachStdout"=>"true",
-		"AttachStderr"=>"true",
-		"OpenStdin" => "true",
+        	Image => "ubuntu",
+
+        	Tty=>"false",
+        
+    		"AttachStdin"=>"true",
+    		"AttachStdout"=>"true",
+    		"AttachStderr"=>"true",
+    		"OpenStdin" => "true",
         );
 
         $c = $a->containers->create(%h);
 
-	ok(!$@, "New container created");
+    	ok(!$@, "New container created");
 
-	ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
+    	ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
+
+        	#
+        	# Run it
+        	#
+            &change_state($c, 'up');
+
 
     	#
-    	# Run it
+    	# Creating a terminal for testing
     	#
-        &change_state($c, 'up');
+    	my $t = Eixo::Docker::Terminal->new(
+
+    		container=>$c
+
+    	);
+
+    	#
+    	# Send a trivial command
+    	#
+    	$t->sendS('/bin/echo', "test66", '>', '/tmp/test1');
+
+    	my $salida = $t->send('/bin/cat', '/tmp/test1');
+    	
+    	is($salida, 'test66', 'Both send and sendS works');
+
+    	#
+    	# End the console
+    	#
+    	$t->send('exit');
 
 
-	#
-	# Creating a terminal for testing
-	#
-	my $t = Eixo::Docker::Terminal->new(
+    };
+    if($@){
+    	print Dumper($@);
+    }
 
-		container=>$c
-
-	);
-
-	#
-	# Send a trivial command
-	#
-	$t->sendS('/bin/echo', "test66", '>', '/tmp/test1');
-
-	my $salida = $t->send('/bin/cat', '/tmp/test1');
-	
-	is($salida, 'test66', 'Both send and sendS work');
-
-	#
-	# End the console
-	#
-	$t->send('exit');
-
-
-};
-if($@){
-	print Dumper($@);
-}
-
-if($c){
+    if($c){
 
         &change_state($c, 'down');
-	# clean the container
-	$c->delete;
+    	# clean the container
+    	$c->delete;
+    }
 }
 
 done_testing();
