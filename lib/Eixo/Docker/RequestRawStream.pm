@@ -13,15 +13,11 @@ use IO::Select;
 use threads;
 use Thread::Queue;
 use Eixo::Docker::Job;
+use Eixo::Docker;
+
 use Carp;
 
 my $JOB_ID = 0;
-
-my $IDENTITY_FUNC = sub {
-
-    (wantarray)? @_ : $_[0];
-
-};
 
 has(
 
@@ -117,7 +113,7 @@ sub process{
             my $return = undef;
 
             while(defined(my $res = $self->queue_out->dequeue())){
-                
+                # print "resposta".Dumper($res);use Data::Dumper;
                 # in perl 5.18 there is a q->end
                 last if($res eq "END");
 
@@ -135,6 +131,17 @@ sub process{
 sub wait_for_job{
 	my ($self, $job_id) = @_;
 
+    # if no job_id was passed, wait for all
+    $job_id = '' unless($job_id);
+
+    # job could be finished before wait
+    if(my ($job) = grep {$_->finished && $_->id eq $job_id} @{$self->jobs}){
+
+        return $job->results;
+    }  
+
+
+    # wait to finish the job
     while(grep { !$_->finished } @{$self->jobs}){
 
         #if(defined(my $res = $self->queue_out->dequeue_nb)){
@@ -154,12 +161,21 @@ sub wait_for_job{
             return $j->results if($j->id eq $job_id && $j->finished);
         }
 
-        print "En wait_for_job\n";
+        # print "En wait_for_job\n";
         #print Dumper($self->jobs)."\n";
 
         select(undef,undef,undef,0.25);
-    }   
+    }
 
+    # if no job_id was passed returns all results
+    unless(defined($job_id)){
+    
+        return map {$_->results} @{$self->jobs};
+        # return map {$_->id => $_->results} @{$self->jobs};
+    }
+    else{
+        die("task not found in job list");
+    }
 }
 
 
@@ -330,15 +346,10 @@ sub _block{
                 }
             }
 
-            # non entendo o last?
-            #last unless($self->f_process->($job_id, $socket));
-            #my $b = $self->f_process->($job_id, $socket);
-            #print "JOB $job_id terminado, devolveu $b bytes\n";
-            #
 
             my $data = $self->process_socket_stream($select);
 
-            # if socket read socket return undef, and no stdin close
+            # if read socket return undef, and no stdin stream connected, close thread
             if(!defined($data) && !$self->args->{stdin}){
                 $self->queue_out->enqueue("END");
                 last;
@@ -395,18 +406,19 @@ sub process_socket_stream{
         # print "leendo a cabeceira: $header\n";
         return unless($header);
     
-        my($stream_type, $length) = unpack('BxxxN', $header);
+        my($stream_type, $length) = unpack('BxxxL>', $header);
     
         return  unless($length > 0);
     
-         print "Vamos a leer do socket $length bytes que venhen do stream $stream_type\n";
+        # print "Vamos a leer do socket $length bytes que venhen do stream $stream_type\n";
     
         $data .= recvall($socket, $length);
     
         return unless(defined($data));
     }
 
-     print "leemos $data\n";
+     # print "leemos $data\n";
+    # print "leemos en total " . length($data)." bytes\n";
 
     $data;
 
@@ -456,63 +468,63 @@ sub process_socket_stream{
 #	}
 #}
 
-sub _stream{
-	my ($self) = @_;
+# sub _stream{
+# 	my ($self) = @_;
 
-	my $data = '';
+# 	my $data = '';
  
-	$self->f_process(sub {
+# 	$self->f_process(sub {
 
-		my $job_id = $_[0];
+# 		my $job_id = $_[0];
 
-		my $socket = $_[1];
+# 		my $socket = $_[1];
 
-		my $ok = undef;
+# 		my $ok = undef;
 
-		my $n = 0;
+# 		my $n = 0;
 
-		my $buf = '';
+# 		my $buf = '';
 
-		while(!$ok){
+# 		while(!$ok){
 
-            #print "JOB: $job_id, Tratando de ler do socket\n";
-			$n = $socket->sysread($buf, 1024);
-            #print "JOB: $job_id, Lemos $n bytes do socket: '$buf'\n";
+#             #print "JOB: $job_id, Tratando de ler do socket\n";
+# 			$n = $socket->sysread($buf, 1024);
+#             #print "JOB: $job_id, Lemos $n bytes do socket: '$buf'\n";
 
-			if(!defined($n)){
+# 			if(!defined($n)){
 
-				if($! != EAGAIN){
+# 				if($! != EAGAIN){
 
-					die($!);
+# 					die($!);
 
-				}
-			}
+# 				}
+# 			}
 
 
-			if($n > 0){
+# 			if($n > 0){
 
-				$data .= $buf;
+# 				$data .= $buf;
 
-                last if($n < 1024);
+#                 last if($n < 1024);
 
-			}
-			else{
-				$ok = 1;
-			}
-		}
+# 			}
+# 			else{
+# 				$ok = 1;
+# 			}
+# 		}
 
-		if($data =~ /\n/){
-			$self->__send('LINE', $_) foreach(split(/\n/, $data));
+# 		if($data =~ /\n/){
+# 			$self->__send('LINE', $_) foreach(split(/\n/, $data));
 
-			$self->queue_out->enqueue([$job_id,$data]);
+# 			$self->queue_out->enqueue([$job_id,$data]);
 
-			$data = '';
-		}
+# 			$data = '';
+# 		}
 
-		length($buf);
+# 		length($buf);
 
-	});
-}
+# 	});
+#}
 
 sub _sendCmd{
 	my ($self, $cmd, $socket) = @_;

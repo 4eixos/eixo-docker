@@ -67,21 +67,26 @@ SKIP: {
         push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
         push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
         push @jobs, $fcmd->('/bin/echo "TEST1"');
-    	push @jobs, $fcmd->('/bin/echo "TEST2"');
+    	# push @jobs, $fcmd->('/bin/echo "TEST2" 1>&2');
     
+        # print Dumper(\@results);use Data::Dumper;
+
         # esperamos a que finalicen os jobs enviados
-        $fout->();
-    
+        my @results =  $fout->();
+        ok($results[0] eq '' && $results[1] eq '', "Testing jobs with stdout redirected");
+        ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
+        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
+
+        ok($results[2] eq "TEST1\n", "Testing job with simple stdout response");
+        # ok($results[3] eq "TEST2\n", "Testing job with stderr response");
+
     	#
     	# Retrieve them
     	#
         #print Dumper($container->copy(Resource => "/tmp/test"));
-        ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
-        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
 
-        my $jid = $fcmd->("find /usr");
+        my $jid = $fcmd->("find /");
         my $res = $fout->($jid);
-        print "resposta longa: ".length($res)."\n";
         ok(length($res) > 1000000, "Test to receive a long string");
     	#
     	# We stop the container	
@@ -92,7 +97,7 @@ SKIP: {
 
     };
     if($@){
-    	print Dumper($@);
+    	print "Exception produced: ".Dumper($@);
     }
 
     if($container){
