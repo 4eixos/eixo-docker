@@ -191,7 +191,8 @@ sub build {
     my $image_name =  $args{t} || $args{tag} || die("Lacks 'tag' param");
 
     my $get_data = { 
-        t => $image_name
+        t => $image_name,
+        rm => "1", # remove intermediate containers
     };
 
     $get_data->{q} = $args{q} || $args{quiet} if(defined($args{q}||$args{quiet}));
@@ -275,7 +276,7 @@ sub insertFile{
 
 			#die("Return value: ".$_[0].", grupo:$1");
 
-			print "$1 ||| \n\n";
+			print $_[0]." ||| \n\n";
 
 			$self->api->images->get(id=>substr($1, 0, 12));			
 		

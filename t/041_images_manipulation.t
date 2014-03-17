@@ -43,11 +43,11 @@ SKIP: {
     
         
          	ok($image = $image->insertFile(
-    
-    		url=>'http://0.0.0.0:6884/test1',
-    		path=>'/tmp/test1',
-    		id=>$image->id
-    
+        
+        		url=>'http://0.0.0.0:6884/test1',
+        		path=>'/tmp/test1',
+        		id=>$image->id
+        
           	), "Insert a file into image");
          		
     
