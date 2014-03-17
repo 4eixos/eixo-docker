@@ -38,9 +38,11 @@ SKIP: {
     
         	$image = $a->images->create(
     
-            	fromImage=>'ubuntu',
+            		fromImage=>'ubuntu',
          	);
-    
+
+		my $current = $image->id;    
+
         
          	ok($image = $image->insertFile(
         
@@ -51,7 +53,6 @@ SKIP: {
           	), "Insert a file into image");
          		
     
-    
     	#
     	# Check if the file is correctly inserted in the image. 
     	#
@@ -61,7 +62,7 @@ SKIP: {
     
     		Hostname => 'test',
     
-    		Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
+    		Cmd => ["/bin/bash"],
     
     		Image => $image->id,
     
@@ -71,12 +72,11 @@ SKIP: {
     	# starting it
     	&change_state($container, "up");
     
-    
     	#
     	# Copying the file
     	#
     	my $salida = $container->copy(Resource=>'/tmp/test1');
-    
+
     	ok(
     
     		$salida =~ /test1\,OK/,
@@ -84,33 +84,31 @@ SKIP: {
     		'A new file has been inserted in the image'
     	);
 
-
-        #
-        # Cleaning up
-        #
-
-        if($pid){
-            kill(9, $pid);
-        }
-
-        if($container){
-
-            &change_state($container, "down");
-
-            $container->delete();
-        }
-
-        if($image){
-            $image->delete();
-        }
-
-
-
-    
     };
     if($@){
     	print Dumper($@);
     }
+
+    #
+    # Cleaning up
+    #
+
+    if($pid){
+        kill(9, $pid);
+    }
+
+    if($container){
+
+      	&change_state($container, "down");
+
+        $container->delete();
+    }
+
+    if($image){
+        $image->delete();
+    }
+
+    
     
 }
 

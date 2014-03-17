@@ -252,6 +252,18 @@ sub insertFile{
 	$args{action} = 'insert';
 
 	$args{__format} = 'RAW';
+	
+	my $ID_NEW_IMAGE;
+	
+	my $f_get_id = sub {
+
+		#($ID_NEW_IMAGE) = $_[0] =~ /\"\w+\"\:\"([^"]+)\"\}$/;
+
+		($ID_NEW_IMAGE) = $_[0] =~ /\"status\"\:\"([^"]+)\"\}/;
+
+		#substr($ID_NEW_IMAGE, 0, 12);			
+	
+	};
 
 	$self->api->postImages(
 
@@ -261,24 +273,37 @@ sub insertFile{
 
 		get_params=>[qw(url path)],
 
-	#	onProgress => sub {print "progress:".$_[0]."\n"},
+		onProgress => sub {
 
-	#	onSuccess => sub {print "success:".$_[0]."\n"},
+			&$f_get_id($_[0]);
+
+		#	print "progress:".$_[0]."\n"
+
+		},
+
+	#	onSuccess => sub {
+
+	#		#print "success:".$_[0]."\n"
+
+	#		
+	#	},
 
 		__callback=>sub {
 
-			use Data::Dumper; 
+			#use Data::Dumper; 
+
+			#print Dumper(\@_);
 
 			#
 			# Take the last id and use it to get the new image
 			#
-			$_[0] =~ /\"\w+\"\:\"([^"]+)\"\}$/;
+			&$f_get_id($_[0]) if($_[0]);
 
 			#die("Return value: ".$_[0].", grupo:$1");
 
-			print $_[0]." ||| \n\n";
+			#print $_[0]." ||| \n\n";
 
-			$self->api->images->get(id=>substr($1, 0, 12));			
+			$self->api->images->get(id=>$ID_NEW_IMAGE);
 		
 		},
 	
