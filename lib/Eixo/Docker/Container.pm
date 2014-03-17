@@ -95,18 +95,21 @@ sub getByName {
 
 sub getAll {
 
-	my $self = $_[0];
+	my ($self,%args) = @_;
 
 	my $list  = [];
 
-	my $args = {all => 1};
+	my $args = {
+        all => 1,
+        limit => $args{limit} || 1000,
+    };
 
     
     $self->api->getContainers(
 
         args => $args,
 
-        get_params => [qw(all)],
+        get_params => [qw(all limit)],
 
         __callback => sub {
 
