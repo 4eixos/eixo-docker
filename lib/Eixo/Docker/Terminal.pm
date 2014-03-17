@@ -46,7 +46,7 @@ sub send{
 
 	my $ret = $self->f_out->($job);
 
-	chomp $ret;
+	chomp $ret if($ret);
 
 	$ret;
 }

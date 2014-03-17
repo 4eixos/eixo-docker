@@ -63,7 +63,7 @@ SKIP: {
 
     	my $salida = $t->send('/bin/cat', '/tmp/test1');
     	
-    	is($salida, 'test66', 'Both send and sendS works');
+    	is($salida, 'test66', 'Both send and sendS work');
 
     	#
     	# End the console
