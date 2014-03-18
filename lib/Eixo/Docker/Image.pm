@@ -69,30 +69,9 @@ sub get{
 		}
 	);
 
-	#$self;
 
 }
 
-sub inspect{
-	my ($self, %args) = @_;
-
-	$args{id} = $self->id unless($args{id});
-	
-	$args{action} = 'json';
-	
-	$self->api->getImages(
-
-		needed=>[qw(id)],
-
-		args=>\%args,
-
-		__callback=>sub {
-
-		}
-
-	);
-
-}
 
 sub history{
 	my ($self, %args) = @_;
@@ -114,7 +93,6 @@ sub history{
 
 			map { 
 
-            #print Dumper($_);
 				Eixo::Docker::ImageResume->new(%{$_})
 
 			} @{$_[0]};
@@ -131,9 +109,6 @@ sub getAll{
 
 	$args{all} = 1;
 
-	#foreach my $i (@{$self->api->getImages(args=>\%args)}){
-	#	push @$list, $self->api->images->populate($i)
-	#}
 
 	$self->api->getImages(
 
@@ -144,7 +119,6 @@ sub getAll{
 		__callback=>sub {
 
  			foreach(@{$_[0]}){
-				# push @$list, $self->api->images->populate($_);
 				push @$list, Eixo::Docker::ImageResume->new(%$_);
 			}
 
@@ -153,7 +127,6 @@ sub getAll{
 
 	);
 
-	$list;
 
 }
 
@@ -185,7 +158,6 @@ sub create{
 		}
 	);
 
-	#$self;
 }
 
 # TODO 
@@ -302,11 +274,7 @@ sub insertFile{
 	
 	my $f_get_id = sub {
 
-		#($ID_NEW_IMAGE) = $_[0] =~ /\"\w+\"\:\"([^"]+)\"\}$/;
-
 		($ID_NEW_IMAGE) = $_[0] =~ /\"status\"\:\"([^"]+)\"\}/;
-
-		#substr($ID_NEW_IMAGE, 0, 12);			
 	
 	};
 
@@ -322,31 +290,15 @@ sub insertFile{
 
 			&$f_get_id($_[0]);
 
-		#	print "progress:".$_[0]."\n"
 
 		},
 
-	#	onSuccess => sub {
-
-	#		#print "success:".$_[0]."\n"
-
-	#		
-	#	},
-
 		__callback=>sub {
-
-			#use Data::Dumper; 
-
-			#print Dumper(\@_);
 
 			#
 			# Take the last id and use it to get the new image
 			#
 			&$f_get_id($_[0]) if($_[0]);
-
-			#die("Return value: ".$_[0].", grupo:$1");
-
-			#print $_[0]." ||| \n\n";
 
 			$self->api->images->get(id=>$ID_NEW_IMAGE);
 		
