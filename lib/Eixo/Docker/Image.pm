@@ -4,9 +4,13 @@ use strict;
 use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
+use Eixo::Docker;
 use Eixo::Docker::Config;
 use Eixo::Docker::ImageResume;
 use Archive::Tar;
+use Cwd;
+
+my @BUILD_QUERY_PARAMS = qw(t tag q quiet nocache rm);
 
 has(
     id => undef,			
@@ -184,9 +188,62 @@ sub create{
 	#$self;
 }
 
-sub build {
+# TODO 
+# sub import{}
 
+sub build{
     my ($self, %args) = @_;
+
+    # args must be string-files to use in build (except build query params)
+    # Dockerfile is a must
+
+    die("Dockerfile arg doesn't exists") unless(defined($args{Dockerfile}));
+    
+    my $tar = Archive::Tar->new;
+
+    while(my ($name, $data) = each (%args)){
+        
+        next if (grep {$_ eq $name} @BUILD_QUERY_PARAMS);
+
+        $tar->add_data($name, $data);
+
+        delete($args{$name});
+    }
+
+    $self->_build($tar, %args);
+}
+
+
+sub build_from_dir{
+    
+    my ($self, %args) = @_;
+
+    die("DIR arg is not present") unless(defined($args{DIR}));
+
+    my $dir = delete($args{DIR});
+
+
+    my $olddir = getcwd();
+
+    chdir($dir);
+
+    my @list = Eixo::Docker::get_dir_files('.');
+
+    my $tar = Archive::Tar->new;
+
+    $tar->add_files(@list);
+
+    chdir($olddir);
+
+    $self->_build($tar, %args);
+
+
+}
+
+
+sub _build {
+
+    my ($self, $tar, %args) = @_;
 
     my $image_name =  $args{t} || $args{tag} || die("Lacks 'tag' param");
 
@@ -198,18 +255,6 @@ sub build {
     $get_data->{q} = $args{q} || $args{quiet} if(defined($args{q}||$args{quiet}));
     $get_data->{nocache} = $args{nocache} if(defined($args{nocache}));
 
-    delete($args{$_}) foreach (qw(q quiet tag t nocache));
-
-
-    # remaining args must be string-files to use in build
-    # Dockerfile is a must
-    die("Dockerfile arg doesn't exists") unless(defined($args{Dockerfile}));
-
-    my $tar = Archive::Tar->new;
-    while(my ($name, $data) = each (%args)){
-        $tar->add_data($name, $data);
-    }
-
     my $params = {
         
         GET_DATA => $get_data,
@@ -218,12 +263,22 @@ sub build {
         __format => "RAW"
     };
 
+    my $PROGRESS_ERROR = undef;
 
     $self->api->postBuild(
         
         args => $params,
 
+        onProgress => sub {
+            my $resp = JSON->new->utf8->decode($_[0]);
+            
+            if($resp->{"error"}){
+                $PROGRESS_ERROR = "Error building image: ".$resp->{errorDetail}->{message};
+            }
+        },
+
 		__callback=>sub {
+            $self->error("build", $PROGRESS_ERROR) if($PROGRESS_ERROR);
 
 			$self->get(id=>$image_name);
 
@@ -234,16 +289,6 @@ sub build {
 
 }
 
-
-sub build_from_dir{
-    
-    my ($self, %args) = @_;
-}
-
-
-sub import{
-
-}
 
 
 sub insertFile{
