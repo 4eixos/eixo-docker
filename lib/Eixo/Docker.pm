@@ -23,5 +23,28 @@ our $IDENTITY_FUNC = sub {
 };
 
 
+sub get_dir_files{
+    my $dir = $_[0];
+    
+    die("dir path specified doesn't exists") unless(-d $dir);
+    
+    opendir(my $fh_dir, $dir) || die("Error opening dir $dir:$!");
+    
+    my @list;
+    
+    while(my $file = readdir($fh_dir)){
+    
+        next if($file =~ /^\.+$/);
+    
+        push @list, "$dir/$file";
+    
+        push @list, get_dir_files("$dir/$file") if(-d "$dir/$file");
+    
+    }
+    
+    closedir($fh_dir);
+    
+    return @list;
+}
 
 1;
