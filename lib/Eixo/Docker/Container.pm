@@ -72,7 +72,6 @@ sub get{
 		},
 	);
 
-	$self;
 }
 
 
@@ -122,7 +121,6 @@ sub getAll {
         }
     );
 
-    $list;
 }
 
 
@@ -152,11 +150,9 @@ sub create {
                 #return container fully loaded
                 $self->get(id => $result->{Id});
 
-		$self;
+                $self;
             }
 	);
-
-    $self;
 
 }
 
