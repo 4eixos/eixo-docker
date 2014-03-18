@@ -36,6 +36,8 @@ Usage
 - Now to interact with it, instantiate a docker api client with the tcp socket url of the docker API:
 
 ```perl
+    use Eixo::Docker::Api;
+
     my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243');
 ```
 
@@ -43,11 +45,73 @@ Usage
     For example: 
 
 ```perl
-    my $container = $a->containers->get(id => "340f03a2c2cfxx");
-    $container->delete();
-    
+    #
+    # CONTAINERS
+    #
+
+    ## get (by id)
+    my $c = $a->containers->get(id => "340f03a2c2cfxx");
+
+    ## getByName
+    my $c = $a->containers->getByName("testing123");
+
+    # create
+    # to see all available params 
+    # http://docs.docker.io/en/latest/api/docker_remote_api_v1.10/#create-a-container
+    my $c = $a->container->create(
+        Hostname => 'test',
+	    Memory	 => 128,
+	    Cmd => ["ls","-l"],
+	    Image => "ubuntu",
+	    Name => "testing123"
+    );
+
+    ## delete
+    $c->delete();
+
+    #
+    # IMAGES
+    #
+
+    ## get
     my $image = $a->images->get(id => "busybox");
+
+    ## create
+    my $image = $a->images->create(
+    
+        fromImage=>'busybox',
+    
+        onSuccess=>sub {
+            
+            print "FINISHED\n";     
+    
+        },
+
+        onProgress=>sub{
+    
+            print $_[0] . "\n";
+        }
+    );
+    
+    ## history 
     print Dumper($image->history);
+
+    ## build
+    my $image = $a->images->build(
+        t => "my_image",
+        Dockerfile => join("\n", <DATA>),
+    );
+
+    ## build_from_dir
+    my $image = $a->images->build_from_dir(
+        t => "my_image",
+        DIR => "/tmp/directroy_with_a_Dockerfile"
+    );
+
+    ## delete
+    $image->delete();
+    
+
 ```
 
 **Containers** supported methods:
@@ -68,11 +132,11 @@ Usage
 
 **Images** supported methods:
 - get
-- inspect
-- history
 - getAll
+- history
 - create
 - build
+- build_from_dir
 - insertFile
 - delete
 
@@ -123,7 +187,7 @@ More info at http://docs.docker.io
 COPYRIGHT AND LICENSE
 ---------------------
 
-Copyright (C) 2013-2014, Fmaseda
+Copyright (C) 2013-2014, Frmadem
 
 Copyright (C) 2013-2014, Javier Gómez
 
