@@ -1,0 +1,43 @@
+{
+   "abstract" : "Suite of modules to interact with Docker",
+   "author" : [
+      "Javier GÃ³mez <alambike@gmail.com>",
+      "Francisco Maseda <frmadem@gmail.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.4205",
+   "license" : [
+      "apache_2_0"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Eixo-Docker",
+   "prereqs" : {
+      "runtime" : {
+         "recommends" : {
+            "HTTP::Server::Simple::CGI" : "0"
+         },
+         "requires" : {
+            "JSON" : "2.5",
+            "LWP::UserAgent" : "5",
+            "Net::HTTP" : "6.06",
+            "perl" : "5.008001"
+         }
+      }
+   },
+   "provides" : {
+      "Eixo::Docker" : {
+         "file" : "lib/Eixo/Docker.pm",
+         "version" : "1.06"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://apache.org/licenses/LICENSE-2.0"
+      ]
+   },
+   "version" : "1.06"
+}
