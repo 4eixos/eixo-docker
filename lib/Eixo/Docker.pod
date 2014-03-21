@@ -3,7 +3,7 @@
 
 =head1 Eixo::Docker module
 
-Perl module to interact with Docker API (http://docs.docker.io/en/latest/reference/api/docker_remote_api/)
+Perl suite of modules to interact with Docker (http://docker.io) 
 
 
 =head2 Installation
@@ -90,8 +90,11 @@ Now to interact with it, instantiate a docker api client with the tcp socket url
 
 =item -
 
-From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in api documentation:
-For example: 
+From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker\_remote\_api/>:
+
+
+Usage examples: 
+
 
 
 =back
@@ -358,4 +361,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

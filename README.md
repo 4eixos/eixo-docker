@@ -1,7 +1,7 @@
 Eixo::Docker module
 ===================
 
-Perl module to interact with Docker API (http://docs.docker.io/en/latest/reference/api/docker\_remote\_api/)
+Perl suite of modules to interact with Docker (http://docker.io) 
 
 Installation
 ------------
@@ -50,8 +50,9 @@ Usage
     my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243');
 ```
 
-- From now on you can call all the Docker api methods throught api products (**containers** and **images**), passing the args indicated in api documentation:
-    For example: 
+- From now on you can call all the Docker api methods throught api products (**containers** and **images**), passing the args indicated in [api documentation](http://docs.docker.io/en/latest/reference/api/docker\_remote\_api/):  
+
+    Usage examples: 
 
 ```perl  
 
