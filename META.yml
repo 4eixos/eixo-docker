@@ -16,7 +16,7 @@ name: Eixo-Docker
 provides:
   Eixo::Docker:
     file: lib/Eixo/Docker.pm
-    version: 1.0602
+    version: 1.061
   Eixo::Docker::Api:
     file: lib/Eixo/Docker/Api.pm
     version: 0
