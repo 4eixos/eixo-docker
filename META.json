@@ -4,7 +4,7 @@
       "Javier GÃ³mez <alambike@gmail.com>",
       "Francisco Maseda <frmadem@gmail.com>"
    ],
-   "dynamic_config" : 0,
+   "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110440",
    "license" : [
       "apache_2_0"
@@ -15,6 +15,11 @@
    },
    "name" : "Eixo-Docker",
    "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.38"
+         }
+      },
       "runtime" : {
          "recommends" : {
             "HTTP::Server::Simple::CGI" : 0

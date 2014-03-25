@@ -19,8 +19,9 @@ my $builder = Module::Build->new(
     requires => {
         'perl' => 5.008001,
         'JSON' => 2.50,
-        'LWP::UserAgent' => 5.0,
         'Net::HTTP' => 6.06,
+        'Eixo::Base' => 0.00,
+        'Eixo::Rest' => 1.00,
     },
 
     recommends => {
