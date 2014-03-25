@@ -15,7 +15,7 @@ use Eixo::Rest::Client;
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 
-our $VERSION = '1.0602';
+our $VERSION = '1.061';
 
 our $IDENTITY_FUNC = sub {
 
