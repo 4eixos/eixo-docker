@@ -10,7 +10,7 @@ my $builder = Module::Build->new(
     dist_abstract => "Suite of modules to interact with Docker",
 
     dist_author => [
-        'Javier Gómez <alambike@gmail.com>', 
+        'Javier Gomez <alambike@gmail.com>', 
         'Francisco Maseda <frmadem@gmail.com>',
     ],
 
