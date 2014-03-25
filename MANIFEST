@@ -4,7 +4,7 @@ EXAMPLE.pl
 LICENSE
 MANIFEST
 META.json
-MYMETA.json
+META.yml
 Makefile.PL
 README.md
 lib/Eixo/Docker.pm
