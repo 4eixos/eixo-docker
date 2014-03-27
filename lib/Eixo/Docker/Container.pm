@@ -268,42 +268,32 @@ sub attach{
 	
 	$args{$_} = $args{$_} || 0 foreach(qw(logs stream stdin stdout stderr));
 
-    # if($args{logs}){
 
-    #     # if only wants log produced in container's stdout|stderr 
-    
-    # }
-    # else{
-        # we want a stream 
+    Eixo::Docker::RequestRawStream->new(
 
-        # with terminal emulation (stdin & stdout)
-        
-        # with only messages produced in stdout|stderr
+    	entity=>'containers',
 
-	    Eixo::Docker::RequestRawStream->new(
+    	id=>$args{id},
 
-	    	entity=>'containers',
+    	action=>'attach',
 
-	    	id=>$args{id},
+    	method=>'POST',
 
-	    	action=>'attach',
+    	host=>$self->api->client->endpoint,
 
-	    	method=>'POST',
+    	args=>\%args,
 
-	    	host=>$self->api->client->endpoint,
+    	url_args=>[qw(logs stream stdin stdout stderr)],
 
-	    	args=>\%args,
+    	f_line=>$args{f_line} || $Eixo::Docker::IDENTITY_FUNC,
 
-	    	url_args=>[qw(logs stream stdin stdout stderr)],
+        f_process => $args{f_process} || $Eixo::Docker::IDENTITY_FUNC,
 
-	    	f_line=>$args{f_line} || $Eixo::Docker::IDENTITY_FUNC,
+        timeout => $args{timeout} || 60,
 
-            f_process => $args{f_process} || $Eixo::Docker::IDENTITY_FUNC,
+        tty_mode => $self->get(id => $args{id})->Config->Tty,
 
-            timeout => $args{timeout} || 60,
-
-	    )->process();
-    # }
+    )->process();
 
 }
 
