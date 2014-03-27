@@ -129,10 +129,10 @@ sub process{
 
 
 sub wait_for_job{
-	my ($self, $job_id) = @_;
+    my ($self, $job_id) = @_;
 
     # if no job_id was passed, wait for all
-    $job_id = '' unless($job_id);
+    $job_id = '' unless(defined($job_id));
 
     # job could be finished before wait
     if(my ($job) = grep {$_->finished && $_->id eq $job_id} @{$self->jobs}){
@@ -161,20 +161,20 @@ sub wait_for_job{
             return $j->results if($j->id eq $job_id && $j->finished);
         }
 
-        # print "En wait_for_job\n";
+        #print "En wait_for_job\n";
         #print Dumper($self->jobs)."\n";
 
         select(undef,undef,undef,0.25);
     }
 
     # if no job_id was passed returns all results
-    unless(defined($job_id)){
+    if($job_id eq ''){
     
         return map {$_->results} @{$self->jobs};
         # return map {$_->id => $_->results} @{$self->jobs};
     }
     else{
-        die("task not found in job list");
+        die("task not found in job list ($job_id)");
     }
 }
 
