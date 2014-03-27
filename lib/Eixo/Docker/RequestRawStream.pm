@@ -58,6 +58,8 @@ has(
     line_termination => "\n",
 
     timeout => 60,
+
+    tty_mode => undef,
 );
 
 
@@ -161,8 +163,8 @@ sub wait_for_job{
             return $j->results if($j->id eq $job_id && $j->finished);
         }
 
-        #print "En wait_for_job\n";
-        #print Dumper($self->jobs)."\n";
+        # print "En wait_for_job\n";
+        # print Dumper($self->jobs)."\n";
 
         select(undef,undef,undef,0.25);
     }
@@ -202,13 +204,6 @@ sub _process{
     ) || die( ref($self) . '::process: error ' . $!);
 
 	$socket->write_request($self->method => $uri);
-	
-	# if($multiplexed){
-	# 	$self->_multiplexedStream($socket);
-	# }
-	# else{
-	# 	$self->_stream($socket);
-	# }
 
 	my($code, $mess, %h) = $socket->read_response_headers;
 
@@ -217,85 +212,19 @@ sub _process{
 
     if($self->args->{stream}){
 	   
-       $self->_block($socket);
+       $self->block($socket);
 
     }
     else{
 
-        $self->_process_request_body($socket);
+        $self->process_request_body($socket);
     }
 
 	threads->exit();
 }
 
 
-sub _process_request_body{
-    my ($self, $socket) = @_;
-
-    my $data = '';
-    my $buf = '';
-
-
-    while (1) {
-
-        $buf = '';
-
-        my $n = $socket->read_entity_body($buf, 1024);
-        # my $n = $socket->sysread($buf, 1024);
-
-        # print "leemos $n bytes do body da request\n";
-
-        if(!defined($n)){
-
-            if($! != EAGAIN || $! != EINTR){
-
-                die("Read failed: $!");
-            }
-        }
-
-        last unless($n > 0);
-
-        $data .= $buf;
-
-    }
-
-    my $result = (length($data) > 8)? 
-        $self->unpack_response_content($data):
-        "";
-
-    $self->queue_out->enqueue([0,$result]);
-    $self->queue_out->enqueue("END");
-}
-
-sub unpack_response_content{
-
-    my ($self, $data) = @_;
-
-    my $line_termination = $self->line_termination;
-
-    my $result = '';
-
-    if($data =~ /$line_termination/){
-
-        foreach my $line (split($line_termination,$data)){
-
-            my($stream_type,$length,$rest) = unpack('BxxxNA*', $line);
-            # print "tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
-            $result .= $rest.$line_termination;
-        }
-    }
-    else{
-        my($stream_type,$length,$rest) = unpack('BxxxNA*', $data);
-        # print "NON HAI FIN DE LINEA:tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
-        $result .= $rest;
-
-    }
-
-    $result;
-}
-
-
-sub _block{
+sub block{
     my ($self, $socket) = @_;
 
     my $job_id = 0;
@@ -317,7 +246,7 @@ sub _block{
             #
             last if($job_id == -1);
         
-            my $send_status = $self->_sendCmd($msg->[1], $socket);
+            my $send_status = $self->__sendCmd($msg->[1], $socket);
 
             # enqueue ACK 
             $self->queue_out->enqueue([$job_id, $send_status]);
@@ -351,6 +280,7 @@ sub _block{
 
             # if read socket return undef, and no stdin stream connected, close thread
             if(!defined($data) && !$self->args->{stdin}){
+  
                 $self->queue_out->enqueue("END");
                 last;
             }
@@ -371,53 +301,39 @@ sub process_socket_stream{
     my ($self,$select) = @_;
     my $STREAM_HEADER_SIZE_BYTES = 8;
 
-    sub recvall{
-        my ($socket, $size) = @_;
-
-        my $data = '';
-        my $buf = '';
-
-        while($size > 0){
-        
-            # $socket->sysread($buf, $size);
-            $socket->read_entity_body($buf, $size);
-
-            return undef if($buf eq '');
-
-            # print "pillamos buffer con '$buf', queda $size\n";
-
-            $data .= $buf;
-            $size -= length($buf);
-        
-        }
-
-        $data;
-    
-    }
-
     # socket stream may be chunked
     my $data = '';
+    my $buf = '';
     while(my @ready = $select->can_read(0.25)){
         # print "hay algo no socket\n";
         my $socket = $ready[0];
 
-        # print "vamos a leer a cabeceira\n";
-        my $header = recvall($socket, $STREAM_HEADER_SIZE_BYTES);
-        # print "leendo a cabeceira: $header\n";
-        return unless($header);
-    
-        my($stream_type, $length) = unpack('BxxxL>', $header);
-    
-        return  unless($length > 0);
-    
-        # print "Vamos a leer do socket $length bytes que venhen do stream $stream_type\n";
-    
-        $data .= recvall($socket, $length);
-    
-        return unless(defined($data));
+        if($self->tty_mode){
+            # in tty mode, data comes in a shot, without header
+            $buf = $self->__recvAll($socket);
+            return unless($buf);
+            $data .= $buf;
+            # print "leemos en tty_mode '$data'\n";
+        }
+        else{
+            # print "vamos a leer a cabeceira\n";
+            my $header = __recvSize($socket, $STREAM_HEADER_SIZE_BYTES);
+            # print "leendo a cabeceira: $header\n";
+            return unless($header);
+        
+            my($stream_type, $length) = unpack('BxxxL>', $header);
+        
+            return  unless($length > 0);
+        
+            # print "Vamos a leer do socket $length bytes que venhen do stream $stream_type\n";
+        
+            $data .= __recvSize($socket, $length);
+        }
+        
+        return unless($data);
     }
 
-     # print "leemos $data\n";
+    # print "leemos $data\n";
     # print "leemos en total " . length($data)." bytes\n";
 
     $data;
@@ -425,108 +341,114 @@ sub process_socket_stream{
 }
 
 
-#sub _block{
-#	my ($self, $socket) = @_;
-#
-#    # $self->args->{stdin}
-#    # $self->args->{stdout}
-#
-#	my $flags;
-#
-#	fcntl($socket, F_GETFL, $flags)  or die "get : $!\n";
-#
-#	$flags |= O_NONBLOCK;
-#
-#	fcntl($socket, F_SETFL, $flags) or die "set: $!\n";
-#
-#	my $select = IO::Select->new;
-#
-#	$select->add($socket);
-#
-#	my $job_id = undef;
-#
-#	while(1){
-#
-#
-#        # TODO:
-#        # funciona ben mentres haxa salida (ou eco =>  Tty = true)
-#        # se non hai saida (pq esta redirixida p.ex) hai que buscar outra forma
-#		my @ready = $select->can_read(0.25);
-#        #####
-#			
-#		if(@ready > 0){
-#
-#			last unless($self->f_process->($job_id, $ready[0]));
-#		}
-#		
-#		if(my $job = $self->queue_in->dequeue_nb){
-#			
-#			$job_id = $job->[0];
-#
-#			$self->_sendCmd($job->[1], $socket);
-#		}
-#	}
-#}
 
-# sub _stream{
-# 	my ($self) = @_;
+sub process_request_body{
+    my ($self, $socket) = @_;
 
-# 	my $data = '';
- 
-# 	$self->f_process(sub {
+    my $data = $self->__recvAll($socket);
 
-# 		my $job_id = $_[0];
+    my $result = (length($data) > 8)? 
+        $self->unpack_response_content($data):
+        "";
 
-# 		my $socket = $_[1];
-
-# 		my $ok = undef;
-
-# 		my $n = 0;
-
-# 		my $buf = '';
-
-# 		while(!$ok){
-
-#             #print "JOB: $job_id, Tratando de ler do socket\n";
-# 			$n = $socket->sysread($buf, 1024);
-#             #print "JOB: $job_id, Lemos $n bytes do socket: '$buf'\n";
-
-# 			if(!defined($n)){
-
-# 				if($! != EAGAIN){
-
-# 					die($!);
-
-# 				}
-# 			}
+    $self->queue_out->enqueue([0,$result]);
+    $self->queue_out->enqueue("END");
+}
 
 
-# 			if($n > 0){
 
-# 				$data .= $buf;
 
-#                 last if($n < 1024);
+sub unpack_response_content{
 
-# 			}
-# 			else{
-# 				$ok = 1;
-# 			}
-# 		}
+    my ($self, $data) = @_;
 
-# 		if($data =~ /\n/){
-# 			$self->__send('LINE', $_) foreach(split(/\n/, $data));
+    my $line_termination = $self->line_termination;
 
-# 			$self->queue_out->enqueue([$job_id,$data]);
+    my $result = '';
 
-# 			$data = '';
-# 		}
+    if($data =~ /$line_termination/){
 
-# 		length($buf);
+        foreach my $line (split($line_termination,$data)){
 
-# 	});
-#}
+            my($stream_type,$length,$rest) = unpack('BxxxNA*', $line);
+            # print "tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
+            $result .= $rest.$line_termination;
+        }
+    }
+    else{
+        my($stream_type,$length,$rest) = unpack('BxxxNA*', $data);
+        # print "NON HAI FIN DE LINEA:tipo:$stream_type|longitud:$length|resto_cadena:$rest\n";
+        $result .= $rest;
 
-sub _sendCmd{
+    }
+
+    $result;
+}
+
+
+
+sub __recvSize{
+    my ($socket, $size) = @_;
+
+    my $data = '';
+    my $buf = '';
+
+    while($size > 0){
+    
+        # $socket->sysread($buf, $size);
+        $socket->read_entity_body($buf, $size);
+
+        return undef if($buf eq '');
+
+        # print "pillamos buffer con '$buf', queda $size\n";
+
+        $data .= $buf;
+        $size -= length($buf);
+    
+    }
+
+    $data;
+
+}
+
+
+sub __recvAll{
+    my ($self, $socket) = @_;
+
+    my $data = '';
+    my $buf = '';
+
+    while (1) {
+
+        $buf = '';
+
+        my $n = $socket->read_entity_body($buf, 1024);
+
+        # print "leemos $buf ($n bytes) do body da request\n";
+
+        if(!defined($n)){
+
+            if($! != EAGAIN || $! != EINTR){
+
+                die("Read failed: $!");
+            }
+        }
+
+        last unless($n > 0);
+
+        $data .= $buf;
+
+        # in tty mode data comes in a shot, block til next input
+        last if($self->tty_mode);
+
+    }
+
+    $data;
+
+}
+
+
+sub __sendCmd{
 	my ($self, $cmd, $socket) = @_;
 
 	$socket->syswrite($cmd . $self->line_termination);
@@ -551,16 +473,6 @@ sub __buildUri{
 		$_ . '=' . $self->args->{$_}
 	
 	} @{$self->url_args});
-}
-
-sub __send{
-	my ($self, $type, $data, $destiny) = @_;
-
-	$destiny = $destiny || $self->f_line;
-
-	if($destiny){
-		$destiny->($data);
-	}
 }
 
 
