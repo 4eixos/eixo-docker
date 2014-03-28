@@ -5,7 +5,7 @@
       "Francisco Maseda <frmadem@gmail.com>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4205, CPAN::Meta::Converter version 2.110440",
+   "generated_by" : "Module::Build version 0.4205",
    "license" : [
       "apache_2_0"
    ],
@@ -22,10 +22,10 @@
       },
       "runtime" : {
          "recommends" : {
-            "HTTP::Server::Simple::CGI" : 0
+            "HTTP::Server::Simple::CGI" : "0"
          },
          "requires" : {
-            "Eixo::Base" : 0,
+            "Eixo::Base" : "1",
             "Eixo::Rest" : "1",
             "JSON" : "2.5",
             "Net::HTTP" : "6.06",
@@ -36,55 +36,43 @@
    "provides" : {
       "Eixo::Docker" : {
          "file" : "lib/Eixo/Docker.pm",
-         "version" : "1.061"
+         "version" : "1.062"
       },
       "Eixo::Docker::Api" : {
-         "file" : "lib/Eixo/Docker/Api.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Api.pm"
       },
       "Eixo::Docker::Config" : {
-         "file" : "lib/Eixo/Docker/Config.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Config.pm"
       },
       "Eixo::Docker::Container" : {
-         "file" : "lib/Eixo/Docker/Container.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Container.pm"
       },
       "Eixo::Docker::ContainerException" : {
-         "file" : "lib/Eixo/Docker/ContainerException.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/ContainerException.pm"
       },
       "Eixo::Docker::ContainerResume" : {
-         "file" : "lib/Eixo/Docker/ContainerResume.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/ContainerResume.pm"
       },
       "Eixo::Docker::HostConfig" : {
-         "file" : "lib/Eixo/Docker/HostConfig.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/HostConfig.pm"
       },
       "Eixo::Docker::Image" : {
-         "file" : "lib/Eixo/Docker/Image.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Image.pm"
       },
       "Eixo::Docker::ImageCommit" : {
-         "file" : "lib/Eixo/Docker/ImageCommit.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/ImageCommit.pm"
       },
       "Eixo::Docker::ImageResume" : {
-         "file" : "lib/Eixo/Docker/ImageResume.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/ImageResume.pm"
       },
       "Eixo::Docker::Job" : {
-         "file" : "lib/Eixo/Docker/Job.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Job.pm"
       },
       "Eixo::Docker::RequestRawStream" : {
-         "file" : "lib/Eixo/Docker/RequestRawStream.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/RequestRawStream.pm"
       },
       "Eixo::Docker::Terminal" : {
-         "file" : "lib/Eixo/Docker/Terminal.pm",
-         "version" : 0
+         "file" : "lib/Eixo/Docker/Terminal.pm"
       }
    },
    "release_status" : "stable",
@@ -93,5 +81,5 @@
          "http://apache.org/licenses/LICENSE-2.0"
       ]
    },
-   "version" : "1.0602"
+   "version" : "1.062"
 }

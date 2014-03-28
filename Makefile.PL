@@ -6,7 +6,7 @@ WriteMakefile
   'NAME' => 'Eixo::Docker',
   'VERSION_FROM' => 'lib/Eixo/Docker.pm',
   'PREREQ_PM' => {
-                   'Eixo::Base' => '0',
+                   'Eixo::Base' => '1',
                    'Eixo::Rest' => '1',
                    'JSON' => '2.5',
                    'Net::HTTP' => '6.06'

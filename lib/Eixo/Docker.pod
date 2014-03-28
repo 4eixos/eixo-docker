@@ -1,52 +1,34 @@
 =encoding utf8
 
 
-=head1 Eixo::Docker module
+=head1 NAME
 
-Perl suite of modules to interact with Docker (http://docker.io) 
-
-
-=head2 Installation
-
-To install this module type the following:
-
-     perl Build.PL  
-    ./Build  
-    ./Build test  
-    ./Build install  
-
-or traditional method: 
+Eixo::Docker - Perl suite of modules to interact with Docker (http://docker.io) 
 
 
-    perl Makefile.PL
-    make
-    make test
-    make install
-
-
-=head2 Dependencies
+=head1 DEPENDENCIES
 
 Currently this module has the following dependencies:
 
 
 =over
 
-=item -
+=item *
 
 JSON >= 2.50,
 
 
-=item -
+=item *
 
 LWP::UserAgent >= 5.0,
 
 
-=item -
+=item *
 
 Net::HTTP   >= 6.06,
 
 
-=item -
+=item *
 
 HTTP::Server::Simple::CGI (for testing purpose)
 
@@ -54,11 +36,11 @@ HTTP::Server::Simple::CGI (for testing purpose)
 =back
 
 
-=head2 Usage
+=head1 USAGE
 
 =over
 
-=item -
+=item *
 
 First we need docker api server running in a tcp socket
 
@@ -70,7 +52,7 @@ And restart docker service
 
 
 
-=item -
+=item *
 
 Now to interact with it, instantiate a docker api client with the tcp socket url of the docker API:
 
@@ -78,17 +60,14 @@ Now to interact with it, instantiate a docker api client with the tcp socket url
 
 =back
 
-```perl  
-
     use Eixo::Docker::Api;
     
     my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243');
 
-```
 
 =over
 
-=item -
+=item *
 
 From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker\_remote\_api/>:
 
@@ -99,7 +78,6 @@ Usage examples:
 
 =back
 
-```perl  
 
     #
     # CONTAINERS
@@ -167,73 +145,72 @@ Usage examples:
     ## delete
     $image->delete();
 
-```
 
 B<Containers> supported methods:
 
 =over
 
-=item -
+=item *
 
 get
 
 
-=item -
+=item *
 
 getByName
 
 
-=item -
+=item *
 
 getAll
 
 
-=item -
+=item *
 
 create 
 
 
-=item -
+=item *
 
 delete
 
 
-=item -
+=item *
 
 status
 
 
-=item -
+=item *
 
 start
 
 
-=item -
+=item *
 
 stop
 
 
-=item -
+=item *
 
 restart
 
 
-=item -
+=item *
 
 kill
 
 
-=item -
+=item *
 
 copy
 
 
-=item -
+=item *
 
 attach
 
 
-=item -
+=item *
 
 top
 
@@ -246,42 +223,42 @@ B<Images> supported methods:
 
 =over
 
-=item -
+=item *
 
 get
 
 
-=item -
+=item *
 
 getAll
 
 
-=item -
+=item *
 
 history
 
 
-=item -
+=item *
 
 create
 
 
-=item -
+=item *
 
 build
 
 
-=item -
+=item *
 
 buildI<from>dir
 
 
-=item -
+=item *
 
 insertFile
 
 
-=item -
+=item *
 
 delete
 
@@ -289,7 +266,7 @@ delete
 =back
 
 
-=head2 Caveats
+=head1 CAVEATS
 
 - No unix socket support, currently only supports tcp connections to Docker API.
 
@@ -315,7 +292,7 @@ Setup docker daemon listening in localhost:4243 tcp port:
 
 =over
 
-=item -
+=item *
 
 Add this line to B</etc/default/docker>
 
@@ -323,7 +300,7 @@ Add this line to B</etc/default/docker>
 
 
 
-=item -
+=item *
 
 restart docker service:
 
@@ -331,7 +308,7 @@ restart docker service:
 
 
 
-=item -
+=item *
 
 export B<DOCKER_TEST_HOST> var to run integration tests
 
@@ -341,10 +318,17 @@ export B<DOCKER_TEST_HOST> var to run integration tests
 
 =back
 
-More info at http://docs.docker.io
+More info at L<http://docs.docker.io>
 
 
-=head2 COPYRIGHT AND LICENSE
+=head1 AUTHORS
+
+Francisco Maseda, E<frmadem@gmail.com>
+
+Javier Gomez, E<alambike@gmail.com>
+
+
+=head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Francisco Maseda
 
@@ -354,7 +338,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    L<http://www.apache.org/licenses/LICENSE-2.0>
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
