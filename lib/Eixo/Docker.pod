@@ -15,17 +15,19 @@ Currently this module has the following dependencies:
 
 =item *
 
+Eixo::Base >= 1.0,
+
+=item *
+
+Eixo::Rest >=  1.0,
+
+=item *
+
 JSON >= 2.50,
 
-
 =item *
 
-LWP::UserAgent >= 5.0,
-
-
-=item *
-
-Net::HTTP   >= 6.06,
+Net::HTTP >= 6.06,
 
 
 =item *
@@ -271,7 +273,9 @@ delete
 - No unix socket support, currently only supports tcp connections to Docker API.
 
 
-=head2 To setup development environment:
+=head1 DEVELOPMENT
+
+To setup development environment:
 
 Ubuntu 12.04 64bits:
 
@@ -321,11 +325,11 @@ export B<DOCKER_TEST_HOST> var to run integration tests
 More info at L<http://docs.docker.io>
 
 
-=head1 AUTHORS
+=head1 AUTHOR
 
-Francisco Maseda, E<frmadem@gmail.com>
+Francisco Maseda, <frmadem@gmail.com>
 
-Javier Gomez, E<alambike@gmail.com>
+Javier Gomez, <alambike@gmail.com>
 
 
 =head1 COPYRIGHT AND LICENSE
@@ -338,7 +342,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    L<http://www.apache.org/licenses/LICENSE-2.0>
+L<http://www.apache.org/licenses/LICENSE-2.0>
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
