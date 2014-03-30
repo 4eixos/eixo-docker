@@ -7,7 +7,7 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name => "Eixo::Docker",
 
-    dist_abstract => "Suite of modules to interact with Docker",
+    dist_abstract => "Suite of Perl modules to interact with Docker",
 
     dist_author => [
         'Javier Gomez <alambike@gmail.com>', 
@@ -27,8 +27,6 @@ my $builder = Module::Build->new(
     recommends => {
         'HTTP::Server::Simple::CGI' => 0
     },
-
-    create_makefile_pl => "traditional",
 
 );
 

@@ -13,6 +13,11 @@ WriteMakefile
                  },
   'INSTALLDIRS' => 'site',
   'EXE_FILES' => [],
-  'PL_FILES' => {}
-)
-;
+  'PL_FILES' => {},
+  
+  ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
+      (
+          ABSTRACT_FROM  => 'lib/Eixo/Docker.pod', # retrieve abstract from module
+          AUTHOR         =>  ['Francisco Maseda <frmadem@gmail.com>', 'Javier Gomez <alambike@gmail.com>']
+      ) : ()),
+);
