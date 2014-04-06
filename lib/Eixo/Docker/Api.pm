@@ -1,6 +1,8 @@
 package Eixo::Docker::Api;
 
 use strict;
+use warnings;
+
 use parent qw(Eixo::Rest::Api);
 
 sub containers {

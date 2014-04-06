@@ -1,6 +1,8 @@
 package Eixo::Docker::Config;
 
 use strict;
+use warnings;
+
 use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 

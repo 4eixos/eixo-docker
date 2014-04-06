@@ -1,6 +1,8 @@
 package Eixo::Docker::RequestRawStream;
 
 use strict;
+use warnings;
+
 use Eixo::Base::Clase;
 
 use Net::HTTP;
