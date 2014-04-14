@@ -26,6 +26,10 @@ Now to interact with it, instantiate a docker api client with the tcp socket url
 
 From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker_remote_api/>:
 
+=head2 Interacting with containers
+
+Getting a container
+
     #
     # CONTAINERS
     #
@@ -35,7 +39,10 @@ From now on you can call all the Docker api methods throught api products (B<con
     
     ## getByName
     my $c = $a->containers->getByName("testing123");
-    
+
+
+Creating a container    
+
     # create
     # to see all available params 
     # http://docs.docker.io/en/latest/api/docker_remote_api_v1.10/#create-a-container
@@ -46,10 +53,60 @@ From now on you can call all the Docker api methods throught api products (B<con
         Image => "ubuntu",
         Name => "testing123"
     );
-    
+
+Creating a container (asynchronous version)
+
+    #
+    #  Closure to get the created container
+    # 
+    my $new_container;
+
+    $api->containers->createAsync(
+	
+	%args_creation,
+
+	onSuccess=> sub {
+
+		$new_container = $_[0];
+
+	}
+
+    );
+
+    #
+    # Waiting for the job to complete
+    #
+    $api->waitForJobs;
+
+    	
+Deleting a container
+
     ## delete
-    $c->delete();
-    
+    $container->delete();
+
+Deleting a container (asynchronous version)
+
+    my $job_id = $container->deleteAsync(
+
+	onSuccess=>sub {
+
+		# 
+		# Container has been deleted
+		#
+	}
+
+    );
+
+    # Others things to do...
+    #
+
+    #
+    # We wait for the specific job to finish
+    #	
+    $api->waitForJob($job_id);
+
+=head2 Interacting with images
+
     #
     # IMAGES
     #
