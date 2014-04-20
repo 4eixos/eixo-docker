@@ -1,6 +1,8 @@
 package Eixo::Docker::Terminal;
 
 use strict;
+use warnings;
+
 use Eixo::Base::Clase;
 
 #

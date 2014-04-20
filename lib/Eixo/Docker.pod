@@ -1,105 +1,33 @@
 =encoding utf8
 
+=head1 NAME
 
-=head1 Eixo::Docker module
+Eixo::Docker - Suite of Perl modules to interact with Docker  
 
-Perl suite of modules to interact with Docker (http://docker.io) 
-
-
-=head2 Installation
-
-To install this module type the following:
-
-     perl Build.PL  
-    ./Build  
-    ./Build test  
-    ./Build install  
-
-or traditional method: 
-
-
-    perl Makefile.PL
-    make
-    make test
-    make install
-
-
-=head2 Dependencies
-
-Currently this module has the following dependencies:
-
-
-=over
-
-=item -
-
-JSON >= 2.50,
-
-
-=item -
-
-LWP::UserAgent >= 5.0,
-
-
-=item -
-
-Net::HTTP   >= 6.06,
-
-
-=item -
-
-HTTP::Server::Simple::CGI (for testing purpose)
-
-
-=back
-
-
-=head2 Usage
-
-=over
-
-=item -
+=head1 SYNOPSIS
 
 First we need docker api server running in a tcp socket
 
-   For example, to run api in localhost:4243, add this line to B</etc/default/docker>
+- For example, to run api in localhost:4243, add this line to B</etc/default/docker>
 
     DOCKER_OPTS="-H 127.0.0.1:4243 -d"
 
-And restart docker service
+- And restart docker service
 
-
-
-=item -
+    $ sudo service docker restart
 
 Now to interact with it, instantiate a docker api client with the tcp socket url of the docker API:
-
-
-
-=back
-
-```perl  
 
     use Eixo::Docker::Api;
     
     my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243');
 
-```
 
-=over
+From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker_remote_api/>:
 
-=item -
+=head2 Interacting with containers
 
-From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker\_remote\_api/>:
-
-
-Usage examples: 
-
-
-
-=back
-
-```perl  
+Getting a container
 
     #
     # CONTAINERS
@@ -110,7 +38,10 @@ Usage examples:
     
     ## getByName
     my $c = $a->containers->getByName("testing123");
-    
+
+
+Creating a container    
+
     # create
     # to see all available params 
     # http://docs.docker.io/en/latest/api/docker_remote_api_v1.10/#create-a-container
@@ -121,17 +52,86 @@ Usage examples:
         Image => "ubuntu",
         Name => "testing123"
     );
-    
+
+Creating a container (asynchronous version)
+
+    #
+    #  Closure to get the created container
+    # 
+    my $new_container;
+
+    $api->containers->createAsync(
+	
+	%args_creation,
+
+	onSuccess=> sub {
+
+		$new_container = $_[0];
+
+	}
+
+    );
+
+    #
+    # Waiting for the job to complete
+    #
+    $api->waitForJobs;
+
+
+Start/stop/restart/kill a container
+
+   $container->start();
+
+   $container->stop();
+
+   $container->restart();
+
+   $container->kill();
+
+
+
+Deleting a container
+
     ## delete
-    $c->delete();
-    
+    $container->delete();
+
+Deleting a container (asynchronous version)
+
+    my $job_id = $container->deleteAsync(
+
+	onSuccess=>sub {
+
+		# 
+		# Container has been deleted
+		#
+	}
+
+    );
+
+    # Others things to do...
     #
-    # IMAGES
+
     #
-    
+    # We wait for the specific job to finish
+    #	
+    $api->waitForJob($job_id);
+
+=head2 Interacting with images
+
+Getting an image 
+
     ## get
     my $image = $a->images->get(id => "busybox");
-    
+
+
+Getting an image history
+
+    ## history 
+    print Dumper($image->history);
+
+
+Create an image pulling it from registry
+
     ## create
     my $image = $a->images->create(
     
@@ -149,9 +149,9 @@ Usage examples:
         }
     );
     
-    ## history 
-    print Dumper($image->history);
-    
+
+Building images (from a Dockerfile)
+
     ## build
     my $image = $a->images->build(
         t => "my_image",
@@ -163,77 +163,84 @@ Usage examples:
         t => "my_image",
         DIR => "/tmp/directroy_with_a_Dockerfile"
     );
-    
+
+
+Deleting an image
+
     ## delete
     $image->delete();
 
-```
+
+=head1 DESCRIPTION
+
+The purpose of this library is to provide a set of modules to interact in a
+simple, but powerful way, with the L<Docker remote api |http://docs.docker.io/en/latest/reference/api/docker_remote_api/>
 
 B<Containers> supported methods:
 
 =over
 
-=item -
+=item *
 
 get
 
 
-=item -
+=item *
 
 getByName
 
 
-=item -
+=item *
 
 getAll
 
 
-=item -
+=item *
 
 create 
 
 
-=item -
+=item *
 
 delete
 
 
-=item -
+=item *
 
 status
 
 
-=item -
+=item *
 
 start
 
 
-=item -
+=item *
 
 stop
 
 
-=item -
+=item *
 
 restart
 
 
-=item -
+=item *
 
 kill
 
 
-=item -
+=item *
 
 copy
 
 
-=item -
+=item *
 
 attach
 
 
-=item -
+=item *
 
 top
 
@@ -246,42 +253,42 @@ B<Images> supported methods:
 
 =over
 
-=item -
+=item *
 
 get
 
 
-=item -
+=item *
 
 getAll
 
 
-=item -
+=item *
 
 history
 
 
-=item -
+=item *
 
 create
 
 
-=item -
+=item *
 
 build
 
 
-=item -
+=item *
 
 buildI<from>dir
 
 
-=item -
+=item *
 
 insertFile
 
 
-=item -
+=item *
 
 delete
 
@@ -289,12 +296,46 @@ delete
 =back
 
 
-=head2 Caveats
+=head1 DEPENDENCIES
+
+Currently this module has the following dependencies:
+
+
+=over
+
+=item *
+
+Eixo::Base >= 1.0,
+
+=item *
+
+Eixo::Rest >=  1.0,
+
+=item *
+
+JSON >= 2.50,
+
+=item *
+
+Net::HTTP >= 6.06,
+
+
+=item *
+
+HTTP::Server::Simple::CGI (for testing purpose)
+
+
+=back
+
+
+=head1 CAVEATS
 
 - No unix socket support, currently only supports tcp connections to Docker API.
 
 
-=head2 To setup development environment:
+=head1 DEVELOPMENT
+
+To setup development environment:
 
 Ubuntu 12.04 64bits:
 
@@ -315,7 +356,7 @@ Setup docker daemon listening in localhost:4243 tcp port:
 
 =over
 
-=item -
+=item *
 
 Add this line to B</etc/default/docker>
 
@@ -323,7 +364,7 @@ Add this line to B</etc/default/docker>
 
 
 
-=item -
+=item *
 
 restart docker service:
 
@@ -331,7 +372,7 @@ restart docker service:
 
 
 
-=item -
+=item *
 
 export B<DOCKER_TEST_HOST> var to run integration tests
 
@@ -341,10 +382,17 @@ export B<DOCKER_TEST_HOST> var to run integration tests
 
 =back
 
-More info at http://docs.docker.io
+More info at L<http://docs.docker.io>
 
 
-=head2 COPYRIGHT AND LICENSE
+=head1 AUTHOR
+
+Francisco Maseda, <frmadem@gmail.com>
+
+Javier Gomez, <alambike@gmail.com>
+
+
+=head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Francisco Maseda
 
@@ -354,10 +402,12 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+L<http://www.apache.org/licenses/LICENSE-2.0>
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+=cut

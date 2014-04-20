@@ -1,6 +1,7 @@
 package Eixo::Docker::ContainerException;
 
 use strict;
+use warnings;
 
 use Eixo::Rest::BaseException;
 

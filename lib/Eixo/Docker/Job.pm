@@ -1,5 +1,8 @@
 package Eixo::Docker::Job;
 
+use strict;
+use warnings;
+
 use Eixo::Base::Clase;
 
 has (
