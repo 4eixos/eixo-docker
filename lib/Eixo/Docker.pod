@@ -78,7 +78,15 @@ Creating a container (asynchronous version)
     #
     $api->waitForJobs;
 
-    	
+
+Start/stop/restart/kill a container
+   $container->start();
+   $container->stop();
+   $container->restart();
+   $container->kill();
+
+
+
 Deleting a container
 
     ## delete
@@ -107,13 +115,20 @@ Deleting a container (asynchronous version)
 
 =head2 Interacting with images
 
-    #
-    # IMAGES
-    #
-    
+Getting an image 
+
     ## get
     my $image = $a->images->get(id => "busybox");
-    
+
+
+Getting an image history
+
+    ## history 
+    print Dumper($image->history);
+
+
+Create an image pulling it from registry
+
     ## create
     my $image = $a->images->create(
     
@@ -131,9 +146,9 @@ Deleting a container (asynchronous version)
         }
     );
     
-    ## history 
-    print Dumper($image->history);
-    
+
+Building images (from a Dockerfile)
+
     ## build
     my $image = $a->images->build(
         t => "my_image",
@@ -145,7 +160,9 @@ Deleting a container (asynchronous version)
         t => "my_image",
         DIR => "/tmp/directroy_with_a_Dockerfile"
     );
-    
+
+
+Deleting an image
     ## delete
     $image->delete();
 
