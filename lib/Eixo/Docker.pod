@@ -80,9 +80,13 @@ Creating a container (asynchronous version)
 
 
 Start/stop/restart/kill a container
+
    $container->start();
+
    $container->stop();
+
    $container->restart();
+
    $container->kill();
 
 
@@ -163,6 +167,7 @@ Building images (from a Dockerfile)
 
 
 Deleting an image
+
     ## delete
     $image->delete();
 
