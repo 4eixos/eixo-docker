@@ -1,6 +1,5 @@
 =encoding utf8
 
-
 =head1 NAME
 
 Eixo::Docker - Suite of Perl modules to interact with Docker  
