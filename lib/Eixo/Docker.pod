@@ -27,7 +27,7 @@ From now on you can call all the Docker api methods throught api products (B<con
 
 =head2 Interacting with containers
 
-Getting a container
+=head3 Getting a container
 
     #
     # CONTAINERS
@@ -40,7 +40,7 @@ Getting a container
     my $c = $a->containers->getByName("testing123");
 
 
-Creating a container    
+=head3 Creating a container    
 
     # create
     # to see all available params 
@@ -53,7 +53,7 @@ Creating a container
         Name => "testing123"
     );
 
-Creating a container (asynchronous version)
+=head3 Creating a container (asynchronous version)
 
     #
     #  Closure to get the created container
@@ -78,7 +78,7 @@ Creating a container (asynchronous version)
     $api->waitForJobs;
 
 
-Start/stop/restart/kill a container
+=head3 Start/stop/restart/kill a container
 
    $container->start();
 
@@ -89,13 +89,38 @@ Start/stop/restart/kill a container
    $container->kill();
 
 
+=head3 Binding a container port to a host interface
 
-Deleting a container
+I<The container must be created with NetworkDisabled = false and ExposedPorts defined> 
+
+    my = $a->containers->create(
+        Hostname => 'test',
+        Cmd => ["nc", "-l", '0.0.0.0', '5555'],
+        Image => "ubuntu",
+        Name => "testing123",
+        NetworkDisabled => "false",
+        ExposedPorts => {
+                 "5555/tcp" =>  {}  
+         },
+    );
+
+I<When starting the container the PortBindings must be defined>
+    
+    $c->start(
+         "PortBindings" => { 
+                 "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] 
+         },
+         "PublishAllPorts" => "false", # true by default ¿?
+         "Privileged" => "false",
+    );
+
+
+=head3 Deleting a container
 
     ## delete
     $container->delete();
 
-Deleting a container (asynchronous version)
+=head3 Deleting a container (asynchronous version)
 
     my $job_id = $container->deleteAsync(
 
@@ -118,19 +143,19 @@ Deleting a container (asynchronous version)
 
 =head2 Interacting with images
 
-Getting an image 
+=head3 Getting an image 
 
     ## get
     my $image = $a->images->get(id => "busybox");
 
 
-Getting an image history
+=head3 Getting an image history
 
     ## history 
     print Dumper($image->history);
 
 
-Create an image pulling it from registry
+=head3 Create an image pulling it from registry
 
     ## create
     my $image = $a->images->create(
@@ -150,7 +175,7 @@ Create an image pulling it from registry
     );
     
 
-Building images (from a Dockerfile)
+=head3 Building images (from a Dockerfile)
 
     ## build
     my $image = $a->images->build(
@@ -165,7 +190,7 @@ Building images (from a Dockerfile)
     );
 
 
-Deleting an image
+=head3 Deleting an image
 
     ## delete
     $image->delete();
