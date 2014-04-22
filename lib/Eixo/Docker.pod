@@ -91,9 +91,9 @@ From now on you can call all the Docker api methods throught api products (B<con
 
 =head3 Binding a container port to a host interface
 
-I<The container must be created with NetworkDisabled = false and ExposedPorts defined> 
+I<The container must be created with 'NetworkDisabled' = false and 'ExposedPorts' defined> 
 
-    my = $a->containers->create(
+    my $c = $a->containers->create(
         Hostname => 'test',
         Cmd => ["nc", "-l", '0.0.0.0', '5555'],
         Image => "ubuntu",
@@ -114,6 +114,29 @@ I<When starting the container the PortBindings must be defined>
          "Privileged" => "false",
     );
 
+=head3 Attaching volumes to containers
+
+I<Similar to ports, 'Volumes' must be specified in creation>
+
+    my $c = $a->containers->create(
+        Hostname => 'test',
+        Cmd => ["nc", "-l", '0.0.0.0', '5555'],
+        Image => "ubuntu",
+        Name => $name,
+        Volumes => {
+            "/mnt" => {},
+            "/usr" => {}
+        },
+    );
+
+I<When starting 'Bind' config must be provided>
+
+        $c->start(
+            "Binds" => [
+                "/mnt:/tmp",
+                "/usr:/usr:ro"
+            ],
+        );
 
 =head3 Deleting a container
 

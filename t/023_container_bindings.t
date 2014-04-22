@@ -26,8 +26,12 @@ SKIP: {
         Name => $name,
         NetworkDisabled => "false",
         ExposedPorts => {
-                 "5555/tcp" =>  {}
-         },
+            "5555/tcp" =>  {}
+        },
+        Volumes => {
+            "/mnt" => {},
+            "/usr" => {}
+        },
 
     );
 
@@ -47,7 +51,10 @@ SKIP: {
 
     ok( 
         $c->start(
-            #"Binds" => ["/tmp:/tmp"],
+            "Binds" => [
+                "/mnt:/tmp",
+                "/usr:/usr:ro",
+            ],
             #"LxcConf" => {"lxc.utsname" => "docker"},
             "PortBindings" => { "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] },
             "PublishAllPorts" => "false",
@@ -82,6 +89,22 @@ SKIP: {
         $port && ($port->{'5555/tcp'}->[0]->{HostPort} eq "11022"),
         "Internal docker port has been connected to Host port" 
     );
+
+    print Dumper($c->Volumes);
+
+    ok(
+        $c->Volumes->{"/mnt"} =~ /vfs/,
+        "Docker Volume /mnt  attached to a vfs Host folder (can't be specified cause RW?)"
+    );
+
+    ok(
+        $c->VolumesRW->{"/mnt"},
+        "Volume /mnt attached as RW"
+    );
+
+    ok(!$c->VolumesRw->{"/usr"}, "Volumen /usr attached as RO");
+
+
 
     $c->kill();
 
