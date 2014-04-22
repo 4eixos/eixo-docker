@@ -91,7 +91,7 @@ From now on you can call all the Docker api methods throught api products (B<con
 
 =head3 Binding a container port to a host interface
 
-I<The container must be created with 'NetworkDisabled' = false and 'ExposedPorts' defined> 
+I<The container must be created with 'NetworkDisabled' = 'false' and 'ExposedPorts' defined> 
 
     my $c = $a->containers->create(
         Hostname => 'test',
@@ -104,7 +104,7 @@ I<The container must be created with 'NetworkDisabled' = false and 'ExposedPorts
          },
     );
 
-I<When starting the container the PortBindings must be defined>
+I<When starting the container the 'PortBindings' must be defined>
     
     $c->start(
          "PortBindings" => { 
@@ -129,7 +129,7 @@ I<Similar to ports, 'Volumes' must be specified in creation>
         },
     );
 
-I<When starting 'Bind' config must be provided>
+I<When starting, 'Binds' config must be provided>
 
         $c->start(
             "Binds" => [
@@ -328,7 +328,7 @@ build
 
 =item *
 
-buildI<from>dir
+build_from_dir
 
 
 =item *
