@@ -12,7 +12,8 @@ use Eixo::Docker::ImageResume;
 use Archive::Tar;
 use Cwd;
 
-my @BUILD_QUERY_PARAMS = qw(t tag q quiet nocache rm);
+my @BUILD_QUERY_PARAMS = qw(t tag q quiet nocache rm forcerm);
+my @CALLBACKS = qw(onStart onProgress onError onSuccess);
 
 has(
     id => undef,			
@@ -178,6 +179,7 @@ sub build{
     while(my ($name, $data) = each (%args)){
         
         next if (grep {$_ eq $name} @BUILD_QUERY_PARAMS);
+        next if (grep {$_ eq $name} @CALLBACKS);
 
         $tar->add_data($name, $data);
 
@@ -249,6 +251,8 @@ sub _build {
             if($resp->{"error"}){
                 $PROGRESS_ERROR = "Error building image: ".$resp->{errorDetail}->{message};
             }
+
+            &{$args{onProgress}}(@_) if(exists($args{onProgress}));
         },
 
 		__callback=>sub {

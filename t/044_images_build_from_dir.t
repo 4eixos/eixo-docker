@@ -33,7 +33,16 @@ SKIP: {
 
         my $i = $a->images->build_from_dir(
             t => $TEST_IMAGE_NAME,
-            DIR => $tempdir->dirname
+            DIR => $tempdir->dirname,
+            onProgress => sub {
+                my $resp = JSON->new->utf8->decode($_[0]);
+                if(exists($resp->{stream})){
+                    print $resp->{stream};
+                }
+                else {
+                    print $_[0];
+                }
+            },
         );
 
         my @hitos = map {$_->CreatedBy} $i->history;

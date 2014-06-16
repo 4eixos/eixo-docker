@@ -14,6 +14,7 @@ SKIP: {
         my $i = $a->images->build(
             t => $TEST_IMAGE_NAME,
             Dockerfile => join("\n", <DATA>),
+            onProgress => sub {print $_[0]},
         );
 
         ok($i && ref($i) eq "Eixo::Docker::Image", "Image build from Dockerfile");
