@@ -19,8 +19,7 @@ has(
 	Config => {},
 	Volumes => {},
 	Image => {},
-	ID => undef,
-	Config => {},
+    Id => undef, # new ID attribute from api#v1.12
 	NetworkSettings => {},
 	VolumesRW => {},
 	HostsPath => '',
@@ -33,9 +32,14 @@ has(
 	Created => '',
 	Driver => '',
 	Name => '',
-	
-
+    ProcessLabel => '',
+    MountLabel => '',
+    ExecDriver => '',
+    
 );
+
+# Alias to fix name attribute changes in api#v1.12
+sub ID { &Id(@_)}
 
 sub initialize {
     my $self = $_[0];
@@ -52,7 +56,7 @@ sub initialize {
 sub get{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->ID if($self->ID);
+	$args{id} = $self->Id || $args{id};
 
 	$self->api->getContainers(
 
@@ -162,7 +166,7 @@ sub create {
 sub delete{
 	my ($self, %args) = @_;
 
-    $args{id} = $self->ID if($self->ID);
+    $args{id} = $self->Id || $args{id};
 
     my $delete_volumes = (exists($args{delete_volumes}))? 
                             $args{delete_volumes}:
@@ -235,7 +239,7 @@ sub kill {
 sub copy{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->ID unless($args{id});
+	$args{id} = $self->Id unless($args{id});
 	$args{action} = 'copy';
 
 	$args{__format} = 'RAW';
@@ -264,7 +268,7 @@ sub copy{
 sub attach{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->ID unless($args{id});
+	$args{id} = $self->Id unless($args{id});
 
 	$args{action} = 'attach';
 	
@@ -302,7 +306,7 @@ sub attach{
 sub top{
 	my ($self, %args) = @_;
 
-	$args{id} = $self->ID unless($args{id});
+	$args{id} = $self->Id unless($args{id});
 
 	$args{__implicit_format} = 1;
 	
@@ -328,7 +332,7 @@ sub top{
 sub __exec {
     my ($self, $action, %args) = @_;
 
-    $args{id} = $self->ID if($self->ID);
+    $args{id} = $self->Id;
 
     $args{action} = $action;
 

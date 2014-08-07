@@ -16,20 +16,33 @@ my @BUILD_QUERY_PARAMS = qw(t tag q quiet nocache rm forcerm);
 my @CALLBACKS = qw(onStart onProgress onError onSuccess);
 
 has(
-    id => undef,			
-    parent => undef,		
-    created => undef,	
-    container => undef, 
-    container_config => {},
-    Size => 0, 		
-    config => {},
-    comment => undef,
-    architecture => undef,
-    docker_version => undef,
-    os => undef,
-    history=>[],
+    Id => undef,			
+    Parent => undef,		
+    Created => undef,	
+    Container => undef, 
+    ContainerConfig => {},
+    Size => 0,
+
+    Config => {},
+    Comment => undef,
+    Architecture => undef,
+    DockerVersion => undef,
+    Os => undef,
+    History=>[],
 );
 
+# Alias to fix name attribute changes in api#v1.12
+sub id { &Id(@_) }
+sub parent { &Parent(@_) }
+sub created { &Created(@_) }
+sub container { &Container(@_) }
+sub container_config { &ContainerConfig(@_) }
+sub config {&Config(@_)}
+sub comment {&Comment(@_)}
+sub architecture {&Architecture(@_)}
+sub docker_version {&DockerVersion(@_)}
+sub os {&Os(@_)}
+#sub history {&History(@_)}
 
 
 sub initialize{
