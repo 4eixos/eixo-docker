@@ -246,7 +246,14 @@ sub _build {
         args => $params,
 
         onProgress => sub {
-            my $resp = JSON->new->utf8->decode($_[0]);
+            my $resp;
+
+            # Must eval json decode, because json string could be chunked, 
+            # so decode could launch exception and breaks image creation
+            # see https://github.com/alambike/eixo-docker/issues/4
+            eval{
+                $resp = JSON->new->utf8->decode($_[0]);
+            };
             
             if($resp->{"error"}){
                 $PROGRESS_ERROR = "Error building image: ".$resp->{errorDetail}->{message};
