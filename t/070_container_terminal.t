@@ -25,7 +25,7 @@ SKIP: {
 
         	Cmd => ['/bin/bash'],
 
-        	Image => "ubuntu",
+        	Image => "ubuntu:14.04",
 
         	Tty=>"false",
         

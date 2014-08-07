@@ -22,7 +22,7 @@ SKIP: {
 
         Hostname => 'test',
         Cmd => ["nc", "-l", '0.0.0.0', '5555'],
-        Image => "ubuntu",
+        Image => "ubuntu:14.04",
         Name => $name,
         NetworkDisabled => "false",
         ExposedPorts => {
@@ -39,7 +39,8 @@ SKIP: {
         $c = $a->containers->create(%h);
     };
     ok(!$@, "New container created");
-
+    print Dumper($@) if($@);
+ 
     #
     # test created container and start
     #
@@ -48,20 +49,23 @@ SKIP: {
        
     };
     ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
+    print Dumper($@) if($@);
 
-    ok( 
-        $c->start(
-            "Binds" => [
-                "/mnt:/tmp",
-                "/usr:/usr:ro",
-            ],
-            #"LxcConf" => {"lxc.utsname" => "docker"},
-            "PortBindings" => { "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] },
-            "PublishAllPorts" => "false",
-            "Privileged" => "false",
-        ),
-        "The container has been started"
-    );
+    eval{
+        ok( 
+            $c->start(
+                "Binds" => [
+                    "/mnt:/tmp",
+                    "/usr:/usr:ro",
+                ],
+                "PortBindings" => { "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] },
+                "PublishAllPorts" => "false",
+                "Privileged" => "false",
+            ),
+            "The container has been started"
+        );
+    };
+    die Dumper($@) if($@);
 
 
     # check NetworkSettings (generated dinamically)

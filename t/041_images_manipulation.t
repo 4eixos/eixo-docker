@@ -37,8 +37,8 @@ SKIP: {
         	$pid = &TestServer::start_server;
     
         	$image = $a->images->create(
-    
-            		fromImage=>'ubuntu',
+                fromImage=>'ubuntu',
+                tag => '14.04',
          	);
 
 		my $current = $image->id;    

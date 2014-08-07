@@ -67,7 +67,7 @@ SKIP: {
 done_testing();
 
 __DATA__
-FROM ubuntu
+FROM ubuntu:14.04
 
 ADD file1 /tmp/
 ADD dir1/ /tmp/dir1

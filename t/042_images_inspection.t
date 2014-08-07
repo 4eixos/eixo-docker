@@ -29,8 +29,9 @@ SKIP: {
     eval{
     
         	$image = $a->images->create(
-    
-            	fromImage=>'ubuntu',
+                
+                fromImage=>'ubuntu',
+                tag => '14.04',
     
          	);
         

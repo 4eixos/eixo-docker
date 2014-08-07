@@ -21,7 +21,7 @@ SKIP: {
     
     eval{
     
-        #$a->images->create(fromImage=>'ubuntu');
+        $a->images->create(fromImage=>"ubuntu", tag => "14.04");
     	
     	#
     	# Create a bash container
@@ -29,7 +29,7 @@ SKIP: {
         my %container_config = (
     		Hostname => 'test',
     		Cmd => ['/bin/bash'],
-    		Image => "ubuntu",
+    		Image => "ubuntu:14.04",
     		Name => $name = "testing_1233_" . int(rand(9999)),
 
             Tty => "false",
@@ -118,7 +118,7 @@ while(1){
         );
     };
     if($@){
-        die($@);
+        die(Dumper($@));
     }
 
     if($container){

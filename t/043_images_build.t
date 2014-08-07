@@ -46,7 +46,7 @@ done_testing();
 
 __DATA__
 
-FROM base
+FROM ubuntu:14.04
 
 MAINTAINER test
 
