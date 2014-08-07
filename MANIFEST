@@ -1,11 +1,7 @@
+Build.PL
 Changes
-EXAMPLE.pl
-LICENSE
-MANIFEST
-META.json
-META.yml
-Makefile.PL
-README.md
+examples/basic_containers_examples.pl
+examples/nodejs-app.pl
 lib/Eixo/Docker.pm
 lib/Eixo/Docker.pod
 lib/Eixo/Docker/Api.pm
@@ -20,6 +16,10 @@ lib/Eixo/Docker/ImageResume.pm
 lib/Eixo/Docker/Job.pm
 lib/Eixo/Docker/RequestRawStream.pm
 lib/Eixo/Docker/Terminal.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+README.pod
 t/000_compile.t
 t/001_class.t
 t/005_client.t
@@ -27,6 +27,7 @@ t/010_request_async.t
 t/020_containers_integration.t
 t/021_containers_attach.t
 t/022_container_logs.t
+t/023_container_bindings.t
 t/025_containers_async.t
 t/040_images_integration.t
 t/041_images_manipulation.t

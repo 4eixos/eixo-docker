@@ -209,7 +209,7 @@ I<When starting, 'Binds' config must be provided>
     ## build_from_dir
     my $image = $a->images->build_from_dir(
         t => "my_image",
-        DIR => "/tmp/directroy_with_a_Dockerfile"
+        DIR => "/tmp/directory_with_a_Dockerfile"
     );
 
 
