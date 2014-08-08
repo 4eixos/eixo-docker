@@ -35,8 +35,12 @@ SKIP: {
             t => $TEST_IMAGE_NAME,
             DIR => $tempdir->dirname,
             onProgress => sub {
-                my $resp = JSON->new->utf8->decode($_[0]);
-                if(exists($resp->{stream})){
+                my $resp;
+                eval { 
+                    $resp = JSON->new->utf8->decode($_[0]);
+                };
+                
+                if(!$@ && exists($resp->{stream})){
                     print $resp->{stream};
                 }
                 else {
