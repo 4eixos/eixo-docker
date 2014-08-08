@@ -28,6 +28,7 @@ SKIP: {
         $a->images->create(
     
             fromImage=>'busybox',
+            tag => 'latest',
     
             onSuccess=>sub {
             
