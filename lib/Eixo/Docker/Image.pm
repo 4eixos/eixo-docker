@@ -152,27 +152,28 @@ sub create{
 
 	# actually, only fromImage it's supported
 
-	my $image = $args{fromImage};
+    my $image = $args{fromImage};
+    my $tag = $args{tag} || 'latest';
 
-	$args{action} = 'create';
-
-	$args{__format} = 'RAW';
-
-	$self->api->postImages(
-
-		needed=>[qw(fromImage)],
-
-		args=>\%args,
-
-		get_params=>[qw(fromImage repo tag registry)],
-
-		__callback=>sub {
-
-			$self->get(id=>$image);
-
-			return $self;
-		}
-	);
+    $args{action} = 'create';
+    
+    $args{__format} = 'RAW';
+    
+    $self->api->postImages(
+    
+    	needed=>[qw(fromImage)],
+    
+    	args=>\%args,
+    
+    	get_params=>[qw(fromImage repo tag registry)],
+    
+    	__callback=>sub {
+    
+    		$self->get(id=>"$image:$tag");
+    
+    		return $self;
+    	}
+    );
 
 }
 
