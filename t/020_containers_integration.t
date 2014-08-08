@@ -63,16 +63,19 @@ SKIP: {
     my $c = undef;
     my $memory = 128*1024*1024; #128MB
 
-    my %h = (
-
-        Hostname => 'test',
-        Memory => $memory,
-        Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
-        Image => "ubuntu:14.04",
-        Name => "testing123",
-    );
-
     eval{
+
+        $a->images->create(fromImage=>'ubuntu',tag=>'14.04');
+
+        my %h = (
+
+            Hostname => 'test',
+            Memory => $memory,
+            Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
+            Image => "ubuntu:14.04",
+            Name => "testing123",
+        );
+
         $c = $a->containers->create(%h);
     };
     ok(!$@, "New container created");
