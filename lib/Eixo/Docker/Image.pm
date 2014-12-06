@@ -290,50 +290,52 @@ sub _build {
 
 
 
-sub insertFile{
-	my ($self, %args) = @_;
+# Deprecated since 1.12
+
+# sub insertFile{
+# 	my ($self, %args) = @_;
 	
-	$args{action} = 'insert';
+# 	$args{action} = 'insert';
 
-	$args{__format} = 'RAW';
+# 	$args{__format} = 'RAW';
 	
-	my $ID_NEW_IMAGE;
+# 	my $ID_NEW_IMAGE;
 	
-	my $f_get_id = sub {
+# 	my $f_get_id = sub {
 
-		($ID_NEW_IMAGE) = $_[0] =~ /\"status\"\:\"([^"]+)\"\}/;
+# 		($ID_NEW_IMAGE) = $_[0] =~ /\"status\"\:\"([^"]+)\"\}/;
 	
-	};
+# 	};
 
-	$self->api->postImages(
+# 	$self->api->postImages(
 
-		needed=>[qw(url path id)],
+# 		needed=>[qw(url path id)],
 
-		args=>\%args,
+# 		args=>\%args,
 
-		get_params=>[qw(url path)],
+# 		get_params=>[qw(url path)],
 
-		onProgress => sub {
+# 		onProgress => sub {
 
-			&$f_get_id($_[0]);
+# 			&$f_get_id($_[0]);
 
 
-		},
+# 		},
 
-		__callback=>sub {
+# 		__callback=>sub {
 
-			#
-			# Take the last id and use it to get the new image
-			#
-			&$f_get_id($_[0]) if($_[0]);
+# 			#
+# 			# Take the last id and use it to get the new image
+# 			#
+# 			&$f_get_id($_[0]) if($_[0]);
 
-			$self->api->images->get(id=>$ID_NEW_IMAGE);
+# 			$self->api->images->get(id=>$ID_NEW_IMAGE);
 		
-		},
+# 		},
 	
 
-	);
-}
+# 	);
+# }
 
 
 sub delete{

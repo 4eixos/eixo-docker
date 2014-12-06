@@ -333,11 +333,6 @@ build_from_dir
 
 =item *
 
-insertFile
-
-
-=item *
-
 delete
 
 
