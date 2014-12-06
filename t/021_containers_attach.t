@@ -2,10 +2,15 @@ use t::test_base;
 
 use Eixo::Docker::Api;
 
-use_ok("Eixo::Docker::RequestRawStream");
+use Config;
+
 
 SKIP: {
     skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
+
+    skip "Perl installation without itreads support", 2 unless($Config{'useithreads'});
+
+    use_ok("Eixo::Docker::RequestRawStream");
 
     my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
     #

@@ -1,52 +1,57 @@
 use t::test_base;
 
-BEGIN{
+SKIP:{
+    skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
+
+    skip "Perl installation without itreads support", 2 unless($Config{'useithreads'});
+
 	use_ok("Eixo::Rest::RequestAsync");
+
+	#
+	# We create a fake UserAgent and a fake Api
+	# 
+	my $TIMES = 5;
+
+	my $api = FakeApi->new;
+	my $ua = FakeUserAgent->new($TIMES, 'OK');
+
+	my @chunks;
+	my $end;
+
+	my $request_async = Eixo::Rest::RequestAsync->new(
+
+		api=>$api,
+
+		onProgress=>sub {
+			push @chunks, $_[0];
+		},
+
+		onSuccess=>sub{
+			$end = $_[0];
+		},
+
+		callback=>sub{
+			@_;
+		},
+
+		__format=>'RAW'
+
+	);
+
+	$request_async->send($ua, undef);
+
+	#
+	# Waiting for the jobs to finish
+	#
+	$api->waitForJobs();
+
+	is(scalar(@chunks), $TIMES, 'Progress of request seems ok');
+
+	is(scalar(grep { 'CHUNK_' .$_ ~~ @chunks } (1..$TIMES)), $TIMES, 'Type of progress seems all right');
+
+	is($end, 'OK', 'The request ended well');
+
 }
-
-#
-# We create a fake UserAgent and a fake Api
-# 
-my $TIMES = 5;
-
-my $api = FakeApi->new;
-my $ua = FakeUserAgent->new($TIMES, 'OK');
-
-my @chunks;
-my $end;
-
-my $request_async = Eixo::Rest::RequestAsync->new(
-
-	api=>$api,
-
-	onProgress=>sub {
-		push @chunks, $_[0];
-	},
-
-	onSuccess=>sub{
-		$end = $_[0];
-	},
-
-	callback=>sub{
-		@_;
-	},
-
-	__format=>'RAW'
-
-);
-
-$request_async->send($ua, undef);
-
-#
-# Waiting for the jobs to finish
-#
-$api->waitForJobs();
-
-is(scalar(@chunks), $TIMES, 'Progress of request seems ok');
-
-is(scalar(grep { 'CHUNK_' .$_ ~~ @chunks } (1..$TIMES)), $TIMES, 'Type of progress seems all right');
-
-is($end, 'OK', 'The request ended well');
 
 done_testing();
 
