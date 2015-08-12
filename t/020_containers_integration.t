@@ -78,8 +78,8 @@ SKIP: {
 
         $c = $a->containers->create(%h);
     };
-    ok(!$@, "New container created");
-    ok($c && $c->Config->Memory == $memory, "Memory correctly asigned");
+    ok(!$@, "New container created ");
+    ok($c && $c->HostConfig->Memory == $memory, "Memory correctly asigned");
 
     #
     # test created container and start
@@ -102,6 +102,16 @@ SKIP: {
         &change_state($c, "down");
     };
     ok(!$@ && !$c->status()->{Running}, "Test container has been stopped");
+
+    #
+    # restart
+    #
+    eval{
+	$c->rename(name=>"loltest");
+    };
+    ok(!$@ && $a->containers->getByName('loltest'), "The container has been correctly renamed");
+
+	
 
     #
     # check restart

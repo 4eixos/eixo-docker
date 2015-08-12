@@ -8,9 +8,13 @@ use parent qw(Eixo::Rest::Product);
 
 has(
 
+	Binds=>[],
+	Links=>[],
+	LxcConf=>{},
 	Hostname => "",
 	User => "",
 	Memory => 0,
+	MemorySwap=>0,
 	AttachStdin => undef,
 	AttachStdout => undef,
 	AttachStderr => undef,
@@ -21,9 +25,9 @@ has(
 	Env => undef,
 	Cmd => [],
 	Dns => undef,
+	DnsSearch => [],
 	Image => "",
 	Volumes =>{},
-	VolumesFrom => "",
 	WorkingDir => "",
 	ExposedPorts => {},
 	Entrypoint=>[],
@@ -33,6 +37,15 @@ has(
 	Domainname=>undef,
 	NetworkDisabled=>undef,
 	OnBuild => undef,
+	PortBindings=>{},
+	ExtraHosts=>undef,
+	CapAdd=>[],
+	CapDrop=>[],
+	Devices=>[],
+	Ulimits=>[{}],
+	SecurityOpt=>[],
+	VolumesFrom => [],
+	
 );
 
 # api_v1.13

@@ -19,7 +19,7 @@ has(
 	Config => {},
 	Volumes => {},
 	Image => {},
-    Id => undef, # new ID attribute from api#v1.12
+    	Id => undef, # new ID attribute from api#v1.12
 	NetworkSettings => {},
 	VolumesRW => {},
 	HostsPath => '',
@@ -32,9 +32,10 @@ has(
 	Created => '',
 	Driver => '',
 	Name => '',
-    ProcessLabel => '',
-    MountLabel => '',
-    ExecDriver => '',
+    
+	ProcessLabel => '',
+    	MountLabel => '',
+   	ExecDriver => '',
     
 );
 
@@ -70,8 +71,11 @@ sub get{
 
 			# load config obj replacing config hash
 			if(my %h = %{$self->Config}){ 
-
 				$self->Config(Eixo::Docker::Config->new(%h))
+			}
+
+			if(my %h = %{$self->HostConfig}){
+				$self->HostConfig(Eixo::Docker::HostConfig->new(%h))
 			}
 
 			$self;
@@ -146,6 +150,7 @@ sub create {
 	$args->{POST_DATA}  = $config;
 
 	my $res = $self->api->postContainers(
+
 			args => $args,
 
 			get_params => [qw(name)],
@@ -202,7 +207,6 @@ sub start {
     $args{POST_DATA}  = $config;
 
     $self->__exec("start", %args);
-
 
 }
 
@@ -328,6 +332,37 @@ sub top{
 	);
 
 }
+
+sub rename{
+	my ($self, %args) = @_;
+
+	$args{id} = $self->Id unless($args{id});
+
+	$args{__implicit_format} = 1;
+
+	$args{action} = 'rename';
+
+	$self->api->postContainers(
+
+		args=>\%args,
+
+		get_params=>[qw(name)],
+
+		needed=>[qw(name)],
+
+		__callback=>sub{
+                	my $result = $_[0];
+
+                	#return container fully loaded
+                	$self->get(id => $result->{Id});
+
+                	$self;
+		}
+
+	);
+}
+
+
 
 sub __exec {
     my ($self, $action, %args) = @_;

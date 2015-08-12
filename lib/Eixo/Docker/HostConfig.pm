@@ -7,17 +7,54 @@ use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
 has(
-    Binds => undef,             #["/tmp:/tmp"]
-    LxcConf => undef,           #{"lxc.utsname":"docker"},
+    Binds => [],             #["/tmp:/tmp"]
+    LxcConf => [],           #{"lxc.utsname":"docker"},
     PortBindings => undef,      # { "22/tcp": [{ "HostPort": "11022" }] },
     PublishAllPorts => undef,   # false,
     Privileged => undef,        #false
     NetworkMode => '',
     ContainerIDFile => '',
-    DnsSearch => undef,
-    Links => undef,
     VolumesFrom => undef,
-    Dns => undef
+    Dns => [],
+
+    Memory => 0,
+    MemorySwap => -1,
+    CpuShares => 0,
+    CpuPeriod => 0,
+    CpusetCpus => "",
+    CpusetMems => "",
+    CpuQuota => 0,
+    BlkioWeight => 0,
+    OomKillDisable => undef,
+    MemorySwappiness => -1,
+    PortBindings => {},
+    Links => [],
+    PublishAllPorts => undef,
+    DnsSearch => [],
+    ExtraHosts => [],
+    Devices => [],
+    IpcMode => "",
+    PidMode => "",
+    UTSMode => "",
+    CapAdd => [],
+    CapDrop => [],
+    GroupAdd => undef,
+    RestartPolicy => {
+       Name => "no",
+       MaximumRetryCount => 0
+    },
+    SecurityOpt => undef,
+    ReadonlyRootfs => undef,
+    Ulimits => undef,
+    LogConfig => {
+       Type => "json-file",
+       Config => {}
+    },
+    CgroupParent => "",
+    ConsoleSize => [
+       0,
+       0
+    ]
 );
 
 

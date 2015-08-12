@@ -96,7 +96,7 @@ SKIP: {
     
     };
     ok(!$@, "New container created");
-    ok($c && $c->Config->Memory == $memory, "Memory correctly asigned.");
+    ok($c && $c->HostConfig->Memory == $memory, "Memory correctly asigned.");
     die(Dumper($c)) unless($c);
     
     #

@@ -24,14 +24,26 @@ SKIP: {
         Cmd => ["nc", "-l", '0.0.0.0', '5555'],
         Image => "ubuntu:14.04",
         Name => $name,
-        NetworkDisabled => "false",
-        ExposedPorts => {
-            "5555/tcp" =>  {}
-        },
-        Volumes => {
-            "/mnt" => {},
-            "/usr" => {}
-        },
+ #       NetworkDisabled => "false",
+ #       ExposedPorts => {
+ #           "5555/tcp" =>  {}
+ #       },
+
+ #	Mounts=>[
+ #
+ #		{
+ #	           
+ #			"Source" => "/mnt",
+ #
+ #	           	"Destination" => "/data",
+ #	           
+ #			"Mode" => "ro,Z",
+ #	           
+ #			"RW" => "false"
+ #	         }
+ #
+ #	
+ #	]
 
     );
 

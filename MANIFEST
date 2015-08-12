@@ -30,7 +30,6 @@ t/022_container_logs.t
 t/023_container_bindings.t
 t/025_containers_async.t
 t/040_images_integration.t
-t/041_images_manipulation.t
 t/042_images_inspection.t
 t/043_images_build.t
 t/044_images_build_from_dir.t
