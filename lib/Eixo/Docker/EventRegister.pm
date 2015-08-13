@@ -3,6 +3,7 @@ package Eixo::Docker::EventRegister;
 use strict;
 
 use JSON;
+use IO::Select;
 use Eixo::Docker::EventPool;
 use Eixo::Docker::Event;
 
@@ -34,6 +35,21 @@ sub DESTROY	{
 	kill('TERM', $_[0]->{pid_pool});
 
 	waitpid($_[0]->{pid_pool}, 0);
+}
+
+#
+# It will block forever 
+#
+sub condvar{
+	my ($self) = @_;
+
+	my $s = IO::Select->new;
+
+	$s->add($self->{r_pool});
+
+	while($s->can_read){
+		$self->run;
+	}
 }
 
 sub run{
