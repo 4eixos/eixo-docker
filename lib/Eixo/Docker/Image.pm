@@ -230,6 +230,34 @@ sub build_from_dir{
 
 }
 
+#
+# Image search
+#
+
+sub search{
+	my ($self, %args) = @_;
+
+	$args{__implicit_format} = 1;
+	$args{action} = "search";
+
+	my @images;	
+
+	$self->api->getImages(
+
+		needed=>[qw(term)],
+
+		get_params=>[qw(term)],
+
+		args=>\%args,
+
+		__callback=>sub {
+
+			@images = @{$_[0]};
+		}
+
+	);	
+
+}
 
 sub _build {
 
