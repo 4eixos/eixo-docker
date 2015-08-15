@@ -30,7 +30,7 @@ sub change_state{
 		$c->start();
 	}
 	else{
-		$c->stop();
+		$c->stop(t=>5);
 	}
 	
 	my $i = 0;

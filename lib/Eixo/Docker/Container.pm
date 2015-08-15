@@ -36,6 +36,8 @@ has(
 	ProcessLabel => '',
     	MountLabel => '',
    	ExecDriver => '',
+
+        Mounts => [],
     
 );
 
@@ -104,16 +106,15 @@ sub getByName {
 
 sub getAll {
 
-	my ($self,%args) = @_;
+    my ($self,%args) = @_;
 
-	my $list  = [];
+    my $list  = [];
 
-	my $args = {
+    my $args = {
         all => 1,
         limit => $args{limit} || 1000,
     };
 
-    
     $self->api->getContainers(
 
         args => $args,
@@ -145,15 +146,25 @@ sub create {
 
 	# validate attrs and initialize default values not setted
 	my $config = Eixo::Docker::Config->new(%attrs);
-	
+        my $hostconfig = Eixo::Docker::HostConfig->new(%{$attrs{HostConfig}});
+        delete($config->{api});
+        delete($hostconfig->{api});
+
+        my $create_data = {
+
+            %$config, 
+            HostConfig => {%$hostconfig},
+        
+        };
+
 	$args->{action} = 'create';
-	$args->{POST_DATA}  = $config;
+	$args->{POST_DATA}  = $create_data;
 
 	my $res = $self->api->postContainers(
 
-			args => $args,
+	    args => $args,
 
-			get_params => [qw(name)],
+	    get_params => [qw(name)],
 
             __callback => sub {
                 my $result = $_[0];

@@ -24,26 +24,28 @@ SKIP: {
         Cmd => ["nc", "-l", '0.0.0.0', '5555'],
         Image => "ubuntu:14.04",
         Name => $name,
- #       NetworkDisabled => "false",
- #       ExposedPorts => {
- #           "5555/tcp" =>  {}
- #       },
+        ExposedPorts => {
+            "5555/tcp" =>  {}
+        },
 
- #	Mounts=>[
- #
- #		{
- #	           
- #			"Source" => "/mnt",
- #
- #	           	"Destination" => "/data",
- #	           
- #			"Mode" => "ro,Z",
- #	           
- #			"RW" => "false"
- #	         }
- #
- #	
- #	]
+        NetworkDisabled => \0,
+
+        HostConfig => {
+            "Binds" => [
+                "/mnt:/tmp",
+                "/usr:/usr:ro",
+            ],
+            "PortBindings" => { 
+                "5555/tcp" =>  [
+                    {
+                        "HostIp" =>  "0.0.0.0", 
+                        "HostPort" =>  "11044" 
+                    }
+                ]
+            },
+            "PublishAllPorts" => \0,
+            "Privileged" => \0,
+        }
 
     );
 
@@ -52,7 +54,6 @@ SKIP: {
     };
     ok(!$@, "New container created");
     print Dumper($@) if($@);
- 
     #
     # test created container and start
     #
@@ -61,24 +62,24 @@ SKIP: {
        
     };
     ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
-    print Dumper($@) if($@);
 
     eval{
         ok( 
             $c->start(
-                "Binds" => [
-                    "/mnt:/tmp",
-                    "/usr:/usr:ro",
-                ],
-                "PortBindings" => { "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] },
-                "PublishAllPorts" => "false",
-                "Privileged" => "false",
+            
+                "PortBindings" => { 
+                    "5555/tcp" =>  [
+                        {
+                            "HostIp" =>  "0.0.0.0", 
+                            "HostPort" =>  "11044" 
+                        }
+                    ]
+                }
             ),
-            "The container has been started"
-        );
+            "The container starts"
+        )
     };
     die Dumper($@) if($@);
-
 
     # check NetworkSettings (generated dinamically)
     #"NetworkSettings": {
@@ -102,23 +103,28 @@ SKIP: {
     my $port = $c->NetworkSettings->{Ports};
     print Dumper($port);
     ok(
-        $port && ($port->{'5555/tcp'}->[0]->{HostPort} eq "11022"),
+        $port && ($port->{'5555/tcp'}->[0]->{HostPort} eq "11044"),
         "Internal docker port has been connected to Host port" 
     );
 
     print Dumper($c->Volumes);
 
     ok(
-        $c->Volumes->{"/mnt"} =~ /vfs/,
-        "Docker Volume /mnt  attached to a vfs Host folder (can't be specified cause RW?)"
+        ($c->Volumes->{"/tmp"} eq '/mnt' && $c->Volumes->{'/usr'} eq '/usr'),
+
+        "Docker volumes attached"
     );
 
     ok(
-        $c->VolumesRW->{"/mnt"},
-        "Volume /mnt attached as RW"
+        $c->Volumes->{'/tmp'} && $c->VolumesRW->{"/tmp"} == 1,
+        "Volume RW attached as RW"
     );
 
-    ok(!$c->VolumesRw->{"/usr"}, "Volumen /usr attached as RO");
+    ok(
+        $c->Volumes->{'/usr'} && $c->VolumesRW->{"/usr"} == 0,
+        
+        "Volumen RO attached as RO"
+    );
 
 
 

@@ -70,7 +70,9 @@ SKIP: {
         my %h = (
 
             Hostname => 'test',
-            Memory => $memory,
+            HostConfig => {
+                Memory => $memory,
+            },
             Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
             Image => "ubuntu:14.04",
             Name => "testing123",

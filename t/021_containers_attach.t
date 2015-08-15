@@ -36,12 +36,12 @@ SKIP: {
     		Cmd => ['/bin/bash'],
     		Image => "ubuntu:14.04",
     		Name => $name = "testing_1233_" . int(rand(9999)),
-    		Tty=>"false",
+    		Tty=>\0,
     
-    		"AttachStdin"=>"true",
-            "AttachStdout"=>"true",
-            "AttachStderr"=>"true",
-    		"OpenStdin" => "true",
+    		"AttachStdin"=>\1,
+                "AttachStdout"=>\1,
+                "AttachStderr"=>\1,
+    		"OpenStdin" => \1,
         );
 
         $container = $a->containers->create(%container_config);
@@ -58,7 +58,7 @@ SKIP: {
     		stdout=>1,
     		stdin=>1,
     		stream=>1,
-            timeout => 1,
+                timeout => 1,
             #f_line => sub {
             #    print $_[0];
             #},

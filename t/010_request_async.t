@@ -1,9 +1,10 @@
 use t::test_base;
+use Config;
 
 SKIP:{
     skip "'DOCKER_TEST_HOST' env var is not set", 2 unless exists($ENV{DOCKER_TEST_HOST});
 
-    skip "Perl installation without itreads support", 2 unless($Config{'useithreads'});
+    skip "Perl installation without ithreads support", 2 unless($Config{useithreads});
 
 	use_ok("Eixo::Rest::RequestAsync");
 
@@ -47,7 +48,9 @@ SKIP:{
 
 	is(scalar(@chunks), $TIMES, 'Progress of request seems ok');
 
-	is(scalar(grep { 'CHUNK_' .$_ ~~ @chunks } (1..$TIMES)), $TIMES, 'Type of progress seems all right');
+        my %chunks = map {$_ => 1 } @chunks;
+
+	is(scalar(grep { exists($chunks{'CHUNK_' .$_}) } (1..$TIMES)), $TIMES, 'Type of progress seems all right');
 
 	is($end, 'OK', 'The request ended well');
 

@@ -36,12 +36,12 @@ SKIP: {
     		Cmd => ['/bin/bash'],
     		Image => "ubuntu:14.04",
     		Name => $name = "testing_1233_" . int(rand(9999)),
-
-            Tty => "false",
-    		"AttachStdin"=>"true",
-            "AttachStdout"=>"true",
-            "AttachStderr"=>"true",
-    		"OpenStdin" => "true",
+                
+                Tty => \0,
+    		AttachStdin =>\1,
+                AttachStdout=>\1,
+                AttachStderr=>\1,
+    		OpenStdin => \1,
         );
 
         $container_config{Cmd} = ['perl','-e','
@@ -68,11 +68,11 @@ while(1){
         sleep(1);
 
     	my $fcmd = $container->attach(
-    
-    		stdout=>1,
+            
+            stdout=>1,
             stderr => 1,
-    		stdin=>0,
-    		stream=>0,
+            stdin=>0,
+            stream=>0,
             logs => 1,
             #f_process => sub {print "mi f_line: ".$_[0]},
         );

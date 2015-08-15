@@ -78,7 +78,9 @@ SKIP: {
     my %h = (
     
     	Hostname => 'test',
-    	Memory => $memory,
+        HostConfig => {
+    	    Memory => $memory,
+        },
     	Cmd => ["perl", "-e", 'while(1){sleep(1)}'],
     	Image => "ubuntu:14.04",
     	Name => "testing123",
@@ -86,7 +88,8 @@ SKIP: {
     
     eval{
     	$a->containers->createAsync(
-    		%h, 
+    		%h,
+
     		onSuccess => sub {
     
     			$c = $_[0];
@@ -96,9 +99,10 @@ SKIP: {
     
     };
     ok(!$@, "New container created");
+    print Dumper($@) if($@);
+
     ok($c && $c->HostConfig->Memory == $memory, "Memory correctly asigned.");
-    die(Dumper($c)) unless($c);
-    
+
     #
     # test created container and start
     #

@@ -7,54 +7,48 @@ use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
 has(
-    Binds => [],             #["/tmp:/tmp"]
-    LxcConf => [],           #{"lxc.utsname":"docker"},
-    PortBindings => undef,      # { "22/tcp": [{ "HostPort": "11022" }] },
-    PublishAllPorts => undef,   # false,
-    Privileged => undef,        #false
-    NetworkMode => '',
-    ContainerIDFile => '',
-    VolumesFrom => undef,
-    Dns => [],
-
-    Memory => 0,
-    MemorySwap => -1,
-    CpuShares => 0,
-    CpuPeriod => 0,
-    CpusetCpus => "",
-    CpusetMems => "",
-    CpuQuota => 0,
+    Binds => undef,
     BlkioWeight => 0,
-    OomKillDisable => undef,
-    MemorySwappiness => -1,
-    PortBindings => {},
-    Links => [],
-    PublishAllPorts => undef,
-    DnsSearch => [],
-    ExtraHosts => [],
+    CapAdd => undef,
+    CapDrop => undef,
+    ContainerIDFile => "",
+    CpusetCpus => "",
+    CpusetMems =>"",
+    CpuShares => 0,
+    CpuPeriod => 100000,
+    CpuQuota => 0,
     Devices => [],
+    Dns => undef,
+    DnsSearch => undef,
+    ExtraHosts => undef,
     IpcMode => "",
-    PidMode => "",
-    UTSMode => "",
-    CapAdd => [],
-    CapDrop => [],
-    GroupAdd => undef,
+    Links => undef,
+    LxcConf => [],
+    Memory => 0,
+    MemorySwap => 0,
+    MemorySwappiness => -1,
+    OomKillDisable => undef,
+    NetworkMode => "bridge",
+    PortBindings => {},
+    Privileged => undef,
+    ReadonlyRootfs => undef,
+    PublishAllPorts => undef,
     RestartPolicy => {
-       Name => "no",
-       MaximumRetryCount => 0
+        MaximumRetryCount => 2,
+        Name => "on-failure"
+    },
+    LogConfig => {
+        Config => {},
+        Type => "json-file"
     },
     SecurityOpt => undef,
-    ReadonlyRootfs => undef,
-    Ulimits => undef,
-    LogConfig => {
-       Type => "json-file",
-       Config => {}
-    },
+    VolumesFrom => undef,
+    Ulimits => [],
     CgroupParent => "",
-    ConsoleSize => [
-       0,
-       0
-    ]
+    ConsoleSize => [0,0],
+    PidMode => "",
+    UTSMode => "",
+    GroupAdd => undef,
 );
 
 

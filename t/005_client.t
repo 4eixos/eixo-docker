@@ -41,7 +41,7 @@ SKIP: {
         PROCESS_DATA => $process_data,
         __callback => $callback
     );
-    diag "Get all containers returns a containers list:";#. Dumper($h);
+    diag "Get all containers returns a containers list";#. Dumper($h);
     
     ok(
     	ref $h eq "ARRAY", 
