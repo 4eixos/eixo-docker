@@ -15,6 +15,10 @@ sub images {
 	$_[0]->produce('Eixo::Docker::Image');
 }
 
+sub version{
+	$_[0]->produce('Eixo::Docker::Version');
+}
+
 sub events{
 	$_[0]->produce('Eixo::Docker::Events');
 }
