@@ -9,6 +9,10 @@ lib/Eixo/Docker/Config.pm
 lib/Eixo/Docker/Container.pm
 lib/Eixo/Docker/ContainerException.pm
 lib/Eixo/Docker/ContainerResume.pm
+lib/Eixo/Docker/Event.pm
+lib/Eixo/Docker/EventPool.pm
+lib/Eixo/Docker/EventRegister.pm
+lib/Eixo/Docker/Events.pm
 lib/Eixo/Docker/HostConfig.pm
 lib/Eixo/Docker/Image.pm
 lib/Eixo/Docker/ImageCommit.pm
@@ -16,6 +20,7 @@ lib/Eixo/Docker/ImageResume.pm
 lib/Eixo/Docker/Job.pm
 lib/Eixo/Docker/RequestRawStream.pm
 lib/Eixo/Docker/Terminal.pm
+lib/Eixo/Docker/Version.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
@@ -28,13 +33,20 @@ t/020_containers_integration.t
 t/021_containers_attach.t
 t/022_container_logs.t
 t/023_container_bindings.t
+t/024_container_links.t
 t/025_containers_async.t
 t/040_images_integration.t
 t/042_images_inspection.t
 t/043_images_build.t
 t/044_images_build_from_dir.t
+t/045_images_search.t
+t/050_events.t
+t/051_events_pool.t
+t/052_events_condvar.t
 t/060_fake_api.t
 t/070_container_terminal.t
+t/080_version.t
+t/a.pl
 t/t.pl
 t/t2.pl
 t/test_base.pm
