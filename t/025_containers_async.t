@@ -18,6 +18,7 @@ SKIP: {
     
     });
     
+    $a->images->create(fromImage=>'ubuntu',tag=>'14.04');
     
     # testing containers get methods
     
@@ -110,7 +111,7 @@ SKIP: {
         $c = $a->containers->getByName("testing123");
        
     };
-    ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
+    ok(!$@ && ref($c) =~ /^Eixo::Docker::Container/, "getByName working correctly");
     
     #
     # up and down in async mode

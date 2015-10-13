@@ -7,7 +7,8 @@ use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
 has(
-    Binds => undef,
+    Binds => [],
+    PortBindings => {},
     BlkioWeight => 0,
     CapAdd => undef,
     CapDrop => undef,
@@ -29,7 +30,6 @@ has(
     MemorySwappiness => -1,
     OomKillDisable => undef,
     NetworkMode => "bridge",
-    PortBindings => {},
     Privileged => undef,
     ReadonlyRootfs => undef,
     PublishAllPorts => undef,

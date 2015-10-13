@@ -8,6 +8,7 @@ lib/Eixo/Docker/Api.pm
 lib/Eixo/Docker/Config.pm
 lib/Eixo/Docker/Container.pm
 lib/Eixo/Docker/ContainerException.pm
+lib/Eixo/Docker/ContainerLegacy.pm
 lib/Eixo/Docker/ContainerResume.pm
 lib/Eixo/Docker/Event.pm
 lib/Eixo/Docker/EventPool.pm

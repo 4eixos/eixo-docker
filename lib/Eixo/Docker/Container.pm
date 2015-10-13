@@ -16,28 +16,30 @@ my $DEFAULT_TIMEOUT = 30;
 
 has(
 
-	Config => {},
-	Volumes => {},
-	Image => {},
-    	Id => undef, # new ID attribute from api#v1.12
-	NetworkSettings => {},
-	VolumesRW => {},
-	HostsPath => '',
-	State => '',
-	HostnamePath => '',
-	Args => [],
-	HostConfig => {},
-	ResolvConfPath => '',
-	Path => '',
+    Id => undef, # new ID attribute from api#v1.12
 	Created => '',
-	Driver => '',
+	Path => '',
+	Args => [],
+	State => {},
+	Image => '',
+	NetworkSettings => {},
+    HostnamePath => '',
+	ResolvConfPath => '',
+	HostsPath => '',
+	LogPath => '',
 	Name => '',
-    
-	ProcessLabel => '',
-    	MountLabel => '',
+    RestartCount => undef,
+	Driver => '',
    	ExecDriver => '',
-
-        Mounts => [],
+	ProcessLabel => '',
+    MountLabel => '',
+    AppArmorProfile =>  "",
+    ExecIDs => undef,
+    
+    HostConfig => {},
+    GraphDriver => {},
+    Mounts => [],
+	Config => {},
     
 );
 
@@ -68,8 +70,9 @@ sub get{
 		args=>\%args,
 		
 		__callback => sub {
-
+    
 			$self->populate($_[0]);
+
 
 			# load config obj replacing config hash
 			if(my %h = %{$self->Config}){ 
@@ -146,19 +149,20 @@ sub create {
 
 	# validate attrs and initialize default values not setted
 	my $config = Eixo::Docker::Config->new(%attrs);
-        my $hostconfig = Eixo::Docker::HostConfig->new(%{$attrs{HostConfig}});
-        delete($config->{api});
-        delete($hostconfig->{api});
+    my $hostconfig = Eixo::Docker::HostConfig->new(%{$attrs{HostConfig}});
+    delete($config->{api});
+    delete($hostconfig->{api});
 
-        my $create_data = {
+    my $create_data = {
 
-            %$config, 
-            HostConfig => {%$hostconfig},
+        %$config, 
+        HostConfig => {%$hostconfig},
         
-        };
+    };
 
 	$args->{action} = 'create';
 	$args->{POST_DATA}  = $create_data;
+
 
 	my $res = $self->api->postContainers(
 
@@ -166,15 +170,16 @@ sub create {
 
 	    get_params => [qw(name)],
 
-            __callback => sub {
-                my $result = $_[0];
+        __callback => sub {
+            my $result = $_[0];
 
-                #return container fully loaded
-                $self->get(id => $result->{Id});
+            #return container fully loaded
+            $self->get(id => $result->{Id});
 
-                $self;
-            }
-	);
+            $self;
+
+        }
+    );
 
 }
 
@@ -362,12 +367,13 @@ sub rename{
 		needed=>[qw(name)],
 
 		__callback=>sub{
-                	my $result = $_[0];
+            
+            my $result = $_[0];
 
-                	#return container fully loaded
-                	$self->get(id => $result->{Id});
+            #return container fully loaded
+            $self->get(id => $result->{Id});
 
-                	$self;
+            $self;
 		}
 
 	);

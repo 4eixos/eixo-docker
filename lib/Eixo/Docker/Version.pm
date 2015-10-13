@@ -7,17 +7,17 @@ use Eixo::Rest::Product;
 use parent qw(Eixo::Rest::Product);
 
 has(
-
-	Version 	=> "",
-     	Os		=> undef,
-     	KernelVersion	=> undef,
-     	GoVersion	=> undef,
-     	GitCommit	=> undef,
-     	Arch		=> undef,
-     	ApiVersion	=> undef, 
-     	Experimental	=> undef, 
-
+    
+    Version 	=> "",
+    Os		=> undef,
+    KernelVersion	=> undef,
+    GoVersion	=> undef,
+    GitCommit	=> undef,
+    Arch		=> undef,
+    ApiVersion	=> undef, 
+    Experimental	=> undef, 
 );
+
 
 sub get{
 	my ($self, %args) = @_;

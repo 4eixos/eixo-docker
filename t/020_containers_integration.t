@@ -45,7 +45,6 @@ SKIP: {
     # TEST CONTAINER LIFECYCLE
     #
     # 0. Drop container testing123 if exists
-    print "Cleaning\n";
     eval {
         my $c = $a->containers->getByName("testing123");
         if($c){
@@ -90,7 +89,7 @@ SKIP: {
         $c = $a->containers->getByName("testing123");
        
     };
-    ok(!$@ && ref($c) eq "Eixo::Docker::Container", "getByName working correctly");
+    ok(!$@ && ref($c) =~ /^Eixo\:\:Docker\:\:Container/, "getByName working correctly");
 
     ok( 
         &change_state($c, "up"), 
