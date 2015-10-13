@@ -110,33 +110,44 @@ I<When starting the container the 'PortBindings' must be defined>
          "PortBindings" => { 
                  "5555/tcp" =>  [{"HostIp" =>  "0.0.0.0", "HostPort" =>  "11022" }] 
          },
-         "PublishAllPorts" => "false", # true by default ¿?
-         "Privileged" => "false",
     );
 
 =head3 Attaching volumes to containers
 
-I<Similar to ports, 'Volumes' must be specified in creation>
+I<Similar to ports, Volumes must be specified in creation as 'Binds' inside 'HostConfig' (since api v1.19)>
 
     my $c = $a->containers->create(
         Hostname => 'test',
         Cmd => ["nc", "-l", '0.0.0.0', '5555'],
         Image => "ubuntu",
         Name => $name,
-        Volumes => {
-            "/mnt" => {},
-            "/usr" => {}
-        },
+        HostConfig => {
+            Binds => {
+                '/mnt:/tmp',
+                '/usr:/usr:ro'
+            },
+        }
     );
 
-I<When starting, 'Binds' config must be provided>
+I<When starting the container the volumes will be seen as 'Mounts' (since docker api v1.20)>
 
-        $c->start(
-            "Binds" => [
-                "/mnt:/tmp",
-                "/usr:/usr:ro"
-            ],
-        );
+  "Mounts": [
+        {
+            "Source": "/mnt",
+            "Destination": "/tmp",
+            "Mode": "",
+            "RW": true
+        },
+        {
+            "Source": "/usr",
+            "Destination": "/usr",
+            "Mode": "",
+            "RW": false
+        }
+
+    ],
+    
+
 
 =head3 Deleting a container
 
