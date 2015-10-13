@@ -7,8 +7,18 @@ use parent qw(Eixo::Rest::Api);
 
 use Eixo::Docker::EventRegister;
 
+sub __legacy {
+    $_[0]->version->get->ApiVersion <= 1.19
+}
+
 sub containers {
-	$_[0]->produce('Eixo::Docker::Container');
+	$_[0]->produce(
+
+        ($_[0]->__legacy)?
+        'Eixo::Docker::ContainerLegacy':
+        'Eixo::Docker::Container'
+
+    );
 }
 
 sub images {

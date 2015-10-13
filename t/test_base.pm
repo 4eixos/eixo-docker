@@ -18,7 +18,7 @@ my $LIMIT = 20;
 sub change_state{
 	my ($c, $new_state) = @_;
 
-	die("Expected container as first argument") unless(ref($c) eq 'Eixo::Docker::Container');
+	die("Expected container as first argument") unless(ref($c) =~ /^Eixo\:\:Docker\:\:Container/);
 	die("'up', 'down' are the only valid states") unless(grep {$new_state eq $_} qw(up down));
 
 	return 1 if(&is_up($c) && $new_state eq 'up');
