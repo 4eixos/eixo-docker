@@ -29,6 +29,7 @@ README.pod
 t/000_compile.t
 t/001_class.t
 t/005_client.t
+t/006_client_https.t
 t/010_request_async.t
 t/020_containers_integration.t
 t/021_containers_attach.t
