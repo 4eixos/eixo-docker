@@ -20,7 +20,29 @@ Now to interact with it, instantiate a docker api client with the tcp socket url
 
     use Eixo::Docker::Api;
     
-    my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243');
+    my $a = Eixo::Docker::Api->new('http://127.0.0.1:4243'); 
+
+    # TO USE https
+
+    my $a = Eixo::Docker::Api->new(
+
+        host => '1.1.1.1:2376', # default to $ENV{DOCKER_HOST},
+        tls_verify => 1,        # default to $ENV{DOCKER_TLS_VERIFY}
+        ca_file => 'ca.pem',    # path to ca cert file, default to $ENV{DOCKER_CERT_PATH}/ca.pem,
+        cert_file =>'cert.pem', # path to client cert file, default to $ENV{DOCKER_CERT_PATH}/cert.pem,
+        key_file => 'key.pem',  # path to client key file, default to $ENV{DOCKER_CERT_PATH}/key.pem
+
+    );
+
+    # OR
+
+    my $a = Eixo::Docker::Api->new(
+        'https://1.1.1.1:2376'
+
+        ca_file => 'ca.pem',
+        cert_file =>'cert.pem',
+        key_file => 'key.pem',
+    );
 
 
 From now on you can call all the Docker api methods throught api products (B<containers> and B<images>), passing the args indicated in L<api documentation|http://docs.docker.io/en/latest/reference/api/docker_remote_api/>:

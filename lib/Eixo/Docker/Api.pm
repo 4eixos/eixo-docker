@@ -2,13 +2,68 @@ package Eixo::Docker::Api;
 
 use strict;
 use warnings;
+use Eixo::Base::Clase;
 
 use parent qw(Eixo::Rest::Api);
 
 use Eixo::Docker::EventRegister;
 
-sub __legacy {
-    $_[0]->version->get->ApiVersion <= 1.19
+my $CERT_PATH = $ENV{DOCKER_CERT_PATH} || '';
+
+has(
+    host => $ENV{DOCKER_HOST},
+    tls_verify => $ENV{DOCKER_TLS_VERIFY},
+    ca_file => $CERT_PATH.'/ca.pem',
+    cert_file => $CERT_PATH.'/cert.pem',
+    key_file => $CERT_PATH.'/key.pem',
+);
+
+sub initialize {   
+    my ($self, @args) = @_;
+
+    if(@args % 2 == 1){
+
+        # if pass an odd number of args in new
+        # firt one must be the docker host
+        $self->host(shift(@args));
+
+        # rest of initialization has to be manual
+        #
+        my %args = @args;
+
+        while(my ($key, $val) = each(%args)){
+            $self->$key($val);
+        }
+    }
+
+    my ($proto,$host) = split '://', $self->host;
+
+    ($host = $proto and $proto = undef) unless($host);    
+    
+    if(!$proto || $proto eq 'tcp'){
+
+        $proto = ($self->tls_verify)? 'https' : 'http';
+    
+    }
+
+
+    $self->SUPER::initialize(
+        
+        "$proto://$host",
+
+        ssl_opts => {
+            ($proto eq 'https')?
+            (
+                SSL_use_cert => 1,
+                verify_hostname => 1,
+                SSL_ca_file => $self->ca_file,
+                SSL_cert_file => $self->cert_file,
+                SSL_key_file => $self->key_file
+
+            ):()
+        }
+    )
+
 }
 
 sub containers {
@@ -44,6 +99,10 @@ sub eventPool{
 
 		
 	);
+}
+
+sub __legacy {
+    $_[0]->version->get->ApiVersion <= 1.19
 }
 
 1;
