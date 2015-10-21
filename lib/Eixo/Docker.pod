@@ -385,7 +385,7 @@ Eixo::Base >= 1.0,
 
 =item *
 
-Eixo::Rest >=  1.0,
+Eixo::Rest >=  1.020,
 
 =item *
 
