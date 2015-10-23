@@ -381,7 +381,7 @@ Currently this module has the following dependencies:
 
 =item *
 
-Eixo::Base >= 1.0,
+Eixo::Base >= 1.200,
 
 =item *
 
