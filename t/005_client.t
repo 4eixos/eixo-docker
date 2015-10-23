@@ -1,7 +1,7 @@
 use t::test_base;
 
 BEGIN{
-    use_ok("Eixo::Rest::Client");
+    use_ok("Eixo::Docker::Api");
 }
 
 SKIP: {
@@ -13,12 +13,12 @@ SKIP: {
     
     my @calls;
     
-    my $a = Eixo::Rest::Client->new($ENV{DOCKER_TEST_HOST});
+    my $a = Eixo::Docker::Api->new($ENV{DOCKER_TEST_HOST});
     
     #
     # Set a logger sub
     #
-    $a->flog(sub {
+    $a->client->flog(sub {
         my ($api_ref, $data, $args) = @_;
     	push @calls, $data->[1];
     
@@ -36,7 +36,7 @@ SKIP: {
     };
     my $callback = sub {$_[0]};
     
-    my $h = $a->getContainers(
+    my $h = $a->containers->getAll(
         GET_DATA => {all => 1},
         PROCESS_DATA => $process_data,
         __callback => $callback
