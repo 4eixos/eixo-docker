@@ -2,9 +2,7 @@ package Eixo::Docker::Image;
 
 use strict;
 use warnings;
-
-use Eixo::Rest::Product;
-use parent qw(Eixo::Rest::Product);
+use Eixo::Base::Clase qw(Eixo::Rest::Product);
 
 use Eixo::Docker;
 use Eixo::Docker::Config;
@@ -47,6 +45,8 @@ sub os {&Os(@_)}
 
 sub initialize{
 	my $self = $_[0];
+
+    $self->SUPER::initialize(@_[1..$#_]);
 
 	# set default Docker::Rest::Client error callback 
 	# to call when API response error is received

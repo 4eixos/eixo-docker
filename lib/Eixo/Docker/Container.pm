@@ -3,8 +3,7 @@ package Eixo::Docker::Container;
 use strict;
 use warnings;
 
-use Eixo::Rest::Product;
-use parent qw(Eixo::Rest::Product);
+use Eixo::Base::Clase qw(Eixo::Rest::Product);
 
 use Eixo::Docker::Config;
 use Eixo::Docker::ContainerResume;
@@ -48,6 +47,8 @@ sub ID { &Id(@_)}
 
 sub initialize {
     my $self = $_[0];
+
+    $self->SUPER::initialize(@_[1..$#_]);
 
     # set default Docker::Rest::Client error callback 
     # to call when API response error is received

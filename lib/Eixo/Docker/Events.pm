@@ -17,7 +17,9 @@ has(
 );
 
 sub initialize {
-    my $self = $_[0];
+    my ($self, @args) = @_;
+
+    $self->SUPER::initialize(@args);
 
     # set default Docker::Rest::Client error callback 
     # to call when API response error is received

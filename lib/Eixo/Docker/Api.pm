@@ -2,9 +2,7 @@ package Eixo::Docker::Api;
 
 use strict;
 use warnings;
-use Eixo::Base::Clase;
-
-use parent qw(Eixo::Rest::Api);
+use Eixo::Base::Clase qw(Eixo::Rest::Api);
 
 use Eixo::Docker::EventRegister;
 

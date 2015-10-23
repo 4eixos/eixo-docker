@@ -3,9 +3,7 @@ package Eixo::Docker::ContainerException;
 use strict;
 use warnings;
 
-use Eixo::Rest::BaseException;
-
-use parent qw(Eixo::Rest::BaseException);
+use Eixo::Base::Clase qw(Eixo::Rest::BaseException);
 
 
 my $ERRORS = {
