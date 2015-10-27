@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Eixo::Base::Clase qw(Eixo::Rest::Product);
 
-use Eixo::Docker;
+#use Eixo::Docker;
 use Eixo::Docker::Config;
 use Eixo::Docker::ImageResume;
 use Archive::Tar;

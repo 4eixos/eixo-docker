@@ -4,7 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 
-use parent qw(Eixo::Base::Clase);
+use Eixo::Base::Clase;
 use JSON;
 use Net::HTTP;
 use Eixo::Rest::Client;

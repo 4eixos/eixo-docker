@@ -5,7 +5,7 @@ SKIP: {
 
     use Eixo::Docker::Api;
 
-    use_ok(Eixo::Docker::Terminal);
+    use_ok('Eixo::Docker::Terminal');
 
     my ($name, $c);
 

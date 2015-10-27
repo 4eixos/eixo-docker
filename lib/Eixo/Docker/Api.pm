@@ -19,22 +19,24 @@ has(
 sub initialize {   
     my ($self, @args) = @_;
 
-    if(@args % 2 == 1){
+    if(@args % 2){
 
         # if pass an odd number of args in new
         # firt one must be the docker host
         $self->host(shift(@args));
 
-        # rest of initialization has to be manual
-        #
-        my %args = @args;
 
-        while(my ($key, $val) = each(%args)){
-            $self->$key($val);
-        }
+    }
+    
+    # rest of initialization has to be manual
+    my %args = @args;
+    
+    while(my ($key, $val) = each(%args)){
+        $self->$key($val);
     }
 
-    my ($proto,$host) = split '://', $self->host;
+    my ($proto, $host) = split ('://', $self->host);
+    
 
     ($host = $proto and $proto = undef) unless($host);    
     

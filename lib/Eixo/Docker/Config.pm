@@ -3,8 +3,7 @@ package Eixo::Docker::Config;
 use strict;
 use warnings;
 
-use Eixo::Rest::Product;
-use parent qw(Eixo::Rest::Product);
+use Eixo::Base::Clase qw(Eixo::Rest::Product);
 
 has(
 	AttachStdin => undef,

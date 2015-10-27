@@ -3,8 +3,7 @@ package Eixo::Docker::ContainerLegacy;
 use strict;
 use warnings;
 
-use Eixo::Rest::Product;
-use parent qw(Eixo::Docker::Container);
+use Eixo::Base::Clase qw(Eixo::Docker::Container);
 
 has(
 

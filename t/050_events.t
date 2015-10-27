@@ -19,7 +19,8 @@ SKIP: {
 
 	# we create a container
 
-	my $C = "testing_" .int(rand(1000));	
+	my $C = "testing_" .int(rand(1000));
+        my $c;
 
 	eval{
 	
