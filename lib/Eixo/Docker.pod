@@ -387,7 +387,11 @@ Eixo::Base >= 1.200,
 
 Eixo::Rest >=  1.020,
 
-To support https we use LWP::Protocol::https module that needs ssl dev libraries installed in system.In ubuntu/debian: `apt-get install libssl-dev`
+To support https we use LWP::Protocol::https module that needs ssl dev libraries installed in system.
+
+In ubuntu/debian: 
+
+   apt-get install libssl-dev
 
 =item *
 
