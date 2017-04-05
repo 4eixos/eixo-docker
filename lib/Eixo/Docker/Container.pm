@@ -219,9 +219,12 @@ sub status{
 sub start {
     my ($self, %args) = @_;
 
-    my $config = Eixo::Docker::HostConfig->new->populate(\%args);
-
-    $args{POST_DATA}  = $config;
+    # From API v1.24, start command does not accepts request body content anymore
+    # https://docs.docker.com/engine/api/version-history/#v124-api-changes
+    if( $self->api->version->get()->ApiVersion < '1.24' ) {
+        my $config = Eixo::Docker::HostConfig->new->populate(\%args);
+        $args{POST_DATA}  = $config;
+    }
 
     $self->__exec("start", %args);
 
