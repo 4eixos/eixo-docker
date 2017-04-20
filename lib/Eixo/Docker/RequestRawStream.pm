@@ -240,7 +240,7 @@ sub block{
         
             # block till receive message from q_in
             my $msg = $self->queue_in->dequeue;
-    
+
             $job_id = $msg->[0];
 
             #

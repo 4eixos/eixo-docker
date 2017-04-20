@@ -100,6 +100,14 @@ sub content{
 	return $_[0]->{content};
 }
 
+sub content_type{
+    "application/json"
+}
+
+sub decoded_content{
+    return $_[0]->{content};
+}
+
 sub request{
 	my ($self, $req, $code) = @_;
 

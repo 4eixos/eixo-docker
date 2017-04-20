@@ -29,8 +29,8 @@ SKIP: {
     eval{
     	$a->noExiste;
     };
-    ok($@ =~ /UNKNOW METHOD/, 'Non-existent Client methods launch exception');
-    
+    ok($@ =~ /unknown rest/i, 'Non-existent Client methods launch exception');
+
     my $process_data = {
         onSuccess => sub {return $_[0]},
     };

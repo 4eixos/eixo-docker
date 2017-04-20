@@ -219,9 +219,9 @@ sub status{
 sub start {
     my ($self, %args) = @_;
 
-    my $config = Eixo::Docker::HostConfig->new->populate(\%args);
+    #my $config = Eixo::Docker::HostConfig->new->populate(\%args);
 
-    $args{POST_DATA}  = $config;
+    #$args{POST_DATA}  = $config;
 
     $self->__exec("start", %args);
 
@@ -261,28 +261,30 @@ sub copy{
 	my ($self, %args) = @_;
 
 	$args{id} = $self->Id unless($args{id});
-	$args{action} = 'copy';
+	$args{action} = 'archive';
 
-	$args{__format} = 'RAW';
+#	$args{__format} = 'RAW';
+	$args{__implicit_format} = 1;
 
-	$self->api->postContainers(
+    $args{POST_DATA} = {};
+	$self->api->getContainers(
 
-		needed=>[qw(Resource)],
+		needed=>[qw(id)],
 
 		args=>\%args,
 	
-		post_params=>[qw(Resource)],
+		get_params=>[qw(path)],
 
 		onProgress=>sub {
 		},
 
-		__callback=>sub {
-
-			#use Data::Dumper; print Dumper(\@_);
-
-			return $_[0] || $_[1]->buffer;
-
-		}
+#		__callback=>sub {
+#
+#			use Data::Dumper; print Dumper(\@_);
+#
+#			return $_[0] #|| $_[1]->buffer;
+#
+#		}
 	);
 }
 

@@ -27,7 +27,7 @@ SKIP: {
     eval{
     
         $a->images->create(fromImage=>'ubuntu', tag=>'14.04');
-    	
+
     	#
     	# Create a bash container
     	#
@@ -67,23 +67,25 @@ SKIP: {
     	#
     	# Create a couple of files
     	# 
-        #push @jobs, $fcmd->('/bin/echo "TEST1" && find / && sleep 10');
+        push @jobs, $fcmd->('/bin/echo "TEST1" && find / && sleep 10');
 
         push @jobs, $fcmd->('/bin/echo "TEST1" > /tmp/test');
         push @jobs, $fcmd->('/bin/echo "TEST2" > /tmp/test2');
         push @jobs, $fcmd->('/bin/echo "TEST1"');
-    	# push @jobs, $fcmd->('/bin/echo "TEST2" 1>&2');
+    	 push @jobs, $fcmd->('/bin/echo "TEST2" 1>&2');
     
         # print Dumper(\@results);use Data::Dumper;
 
         # esperamos a que finalicen os jobs enviados
         my @results =  $fout->();
+
         ok($results[0] eq '' && $results[1] eq '', "Testing jobs with stdout redirected");
-        ok($container->copy(Resource=>'/tmp/test') =~ /TEST1/, 'File was created');
-        ok($container->copy(Resource=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
+        ok($container->copy(path=>'/etc/hosts') =~ /TEST1/, 'File was created');
+        die 234;
+        ok($container->copy(path=>'/tmp/test2') =~ /TEST2/, 'File was created (2)');
 
         ok($results[2] eq "TEST1\n", "Testing job with simple stdout response");
-        # ok($results[3] eq "TEST2\n", "Testing job with stderr response");
+        ok($results[3] eq "TEST2\n", "Testing job with stderr response");
 
     	#
     	# Retrieve them
@@ -98,7 +100,8 @@ SKIP: {
     	#
         $fcmd->('exit');
         $fout->();
-    
+ 
+        $container = undef;   
 
     };
     if($@){
